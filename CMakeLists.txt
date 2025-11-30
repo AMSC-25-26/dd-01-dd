@@ -32,7 +32,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${01_DD_DIR}/bin")
 ##############################################
 #              Our Libraries                 #
 ##############################################
-
+add_library(solvers src/solver.cpp)
 
 ##############################################
 #                 Our Tests                  #
