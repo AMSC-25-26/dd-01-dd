@@ -1,15 +1,18 @@
+#ifndef DD_01_DD_TYPES_HPP
+#define DD_01_DD_TYPES_HPP
+
 #include <vector>
 #include <functional>
 #include <cstddef>
 
-struct Types {
+template 
+class Types {
     using Real = double;
     using Index = int;
     using Size = size_t;
     using Vector = std::vector<Real>;
     using Function = std::function<Real(Real)>;
-
-    // when we add 2 dimensions, we can add the other things 
+    
     template<int dim>
     struct Domain {
         Real a, b;
