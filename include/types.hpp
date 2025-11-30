@@ -5,42 +5,42 @@
 #include <functional>
 #include <cstddef>
 
-template 
+template<int dim>
 class Types {
+    public:
     using Real = double;
     using Index = int;
     using Size = size_t;
-    using Vector = std::vector<Real>;
+    using Vector = std::vector<Real>;       //TODO decide if std::vector or Eigen::VectorXd
     using Function = std::function<Real(Real)>;
-    
-    template<int dim>
-    struct Domain {
-        Real a, b;
-    };
+ 
+    typedef struct {
+        Real a, b; 
+    } Domain1D;
+    using Domain = Domain1D;
 
-    template<int dim>
-    struct BoundaryVals {
-        Real u_a, u_b;
-    };
+    typedef struct {
+        Real u_a, u_b; 
+    } BoundaryVals1D;
+    using BoundaryVals = BoundaryVals1D;
 
-    struct SubIndexes {
-        Index i, j;
-    };
+    typedef struct {Index i, j; } SubIndexes;
 
-    template<int dim>
-    struct PDEParams {
+    typedef struct {
         Real mu, c;
         Function f;
-        Domain<dim> omega;
-    };
+        Domain omega;
+    } PDEParams;
 
-    struct SchwarzParams {
+    typedef struct {
         int N;
         Real delta;
-    };
+    } SchwarzParams;
 
-    struct SolverParams {
+    typedef struct {
         Real eps;
         int maxiter;
-    };
+    } SolverParams;
 }
+
+#endif //DD_01_DD_TYPES_HPP
