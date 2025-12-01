@@ -3,44 +3,49 @@
 
 #include <vector>
 #include <functional>
-#include <cstddef>
+#include <type_traits>
 
-template<int dim>
-class Types {
+template<size_t dim> class Types;
+
+template<> class Types<1> {
     public:
     using Real = double;
     using Index = int;
     using Size = size_t;
     using Vector = std::vector<Real>;       //TODO decide if std::vector or Eigen::VectorXd
     using Function = std::function<Real(Real)>;
- 
-    typedef struct {
-        Real a, b; 
-    } Domain1D;
-    using Domain = Domain1D;
 
-    typedef struct {
+    struct Domain {
+        Real a, b;
+    } ;
+
+    struct BoundaryVals{
         Real u_a, u_b; 
-    } BoundaryVals1D;
-    using BoundaryVals = BoundaryVals1D;
+    };
 
-    typedef struct {Index i, j; } SubIndexes;
+    struct SubIndexes {
+        Index i, j;
+    };
 
-    typedef struct {
+    struct PDEParams {
         Real mu, c;
         Function f;
         Domain omega;
-    } PDEParams;
+    };
 
-    typedef struct {
+    struct SchwarzParams {
         int N;
         Real delta;
-    } SchwarzParams;
+    };
 
-    typedef struct {
+    struct SolverParams {
         Real eps;
-        int maxiter;
-    } SolverParams;
-}
+        int max_iter;
+    };
+};
+
+template<> class Types<2> {
+    /** TODO: part two of project **/
+};
 
 #endif //DD_01_DD_TYPES_HPP
