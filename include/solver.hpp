@@ -12,25 +12,34 @@
 #define DD_01_DD_SOLVER_HPP
 
 #include <types.hpp>
+#include <TridiagUtils.hpp>
 
-template<int dim>
-class PDESolver {
-protected:
+template<size_t dim> class PDESolver : protected Types<dim>{};
+
+template<> class PDESolver<1> : protected Types<1> {
+    public:
     Real mu, c, eps, delta, h;
-    Domain<dim> omega;
+    Domain omega;
     Function f;
+    /** TODO move these to discrete solver along with SolverParams */
     int max_iter, Nsub;
 
-protected:
+    protected:
     SubIndexes global_to_sub(Index k) const;
     Index sub_to_local(SubIndexes ij) const;
 
-public:
-    PDESolver(const PDEParams<dim>& pde_params,
+    /** TODO Maybe remove constructor */
+    public:
+    PDESolver(const PDEParams& pde_params,
               const SchwarzParams& schwarz_params,
-              const SolverParams& solver_params);
+              const SolverParams& solver_params,
+              Real h);
+    ~PDESolver() = default;
 
 };
+
+
+template<size_t dim> class SubdomainSolver : protected PDESolver<dim>{};
 
 /**
  * @class SubdomainSolver
@@ -40,7 +49,7 @@ public:
  * The solution is computed by storing the Thomas factorization of the tridiagonal matrix.
  * @see FactorizedTridiag
  */
-class SubdomainSolver : protected PDESolver {
+template<> class SubdomainSolver<1> : protected PDESolver<1> {
 
 
     public:
@@ -49,10 +58,10 @@ class SubdomainSolver : protected PDESolver {
          * @brief Contains current values at the boundary, will be updated at each iteration
          * @see SubdomainSolver::update_boundary
          */
-        BoundaryVals *boundary_values;
+        BoundaryVals *boundary_values{};
         FactorizedTridiag *ftd;             //*< @see FactorizedTridiag
 
-        SubdomainSolver(const PDEPArams &pdep, const SchwarzParams &sp, BoundaryVals *bv, const Real h, const Index i);
+        SubdomainSolver(const PDEParams &pdep, const SchwarzParams &sp, BoundaryVals *bv, const Real h, const Index i);
         ~SubdomainSolver() = default;
 
         /**
