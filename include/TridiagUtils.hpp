@@ -4,7 +4,7 @@
 #include <types.hpp>
 #include <iostream>
 
-class FactorizedTridiag  : protected Types{
+class FactorizedTridiag  : protected Types<1> {
 private:
     Vector _lower;  // n-1 elements: l[0] ... l[n-2]
     Vector _diag;   // n elements:   d[0] ... d[n-1]
