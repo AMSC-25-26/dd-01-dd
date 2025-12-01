@@ -1,3 +1,6 @@
+#ifndef DD_01_DD_TRIDIAGUTILS_HPP
+#define DD_01_DD_TRIDIAGUTILS_HPP
+
 #include <types.hpp>
 #include <iostream>
 
@@ -17,3 +20,5 @@ public:
 
     void print() const;
 };
+
+#endif //DD_01_DD_TRIDIAGUTILS_HPP
