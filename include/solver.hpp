@@ -1,7 +1,7 @@
-#ifndef SOLVER_HPP
-#define SOLVER_HPP
+#ifndef DD_01_DD_SOLVER_HPP
+#define DD_01_DD_SOLVER_HPP
 
-#include "types.hpp"
+#include <types.hpp>
 
 template<int dim>
 class PDESolver {
@@ -22,4 +22,4 @@ public:
 
 };
 
-#endif
+#endif //DD_01_DD_SOLVER_HPP
