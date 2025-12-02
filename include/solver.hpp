@@ -97,4 +97,54 @@ template<> class SubdomainSolver<1> : protected PDESolver<1> {
         Real stiff_mat(Index j, Index k) const;
 };
 
+
+template<size_t dim> class DiscreteSolver : protected PDESolver<dim>{};
+
+/**
+ * @class DiscreteSolver
+ * @brief Solve the Overlapping Schwarz discrete PDE problem.
+ * This class manages the overall solution of the Overlapping Schwarz PDE problem
+ * by coordinating the subdomain solvers in parallel and iterating until convergence.
+ */
+template<> class DiscreteSolver<1> : protected PDESolver<1> {
+
+
+    public:
+        DiscreteSolver(const PDEParams &pdep, const SchwarzParams &sp, SolverParams *sp, const Real h);
+        ~DiscreteSolver() = default;
+
+        /**
+         * Solves $Au = b$, where $A$ is the global stiffness matrix and $b$ the global load vector,
+         * by iteratively solving the subdomain problems and updating the boundary conditions.
+         * @return The global solution vector
+         */
+        Vector solve() const;
+
+        /**
+         * @brief TODO
+         */
+        void print_to_file();
+
+    private:
+        /**
+         * Advances the computation of one iteration, using SubdomainSolver, on each parallel process.
+         * When all processes have completed their iteration, the partial solutions are gathered.
+         */
+        void advance();
+
+        /**
+         * Gathers the partial solutions from each subdomain solver into a single global solution vector and
+         * constucts $u_{k+1}$
+         * @return The global solution vector
+         */
+        Vector gather_partial_solutions() const;
+
+        /**
+         * Computes the current boundary conditions for subdomain i
+         * @param i The subdomain index
+         * @return Computed boundary conditions
+         */
+        BoundaryVals current_boundary_cond(Index i) const;
+};
+
 #endif //DD_01_DD_SOLVER_HPP
