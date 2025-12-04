@@ -82,9 +82,8 @@ template<> class SubdomainSolver<1> : protected PDESolver<1> {
 
         /**
          * @brief Updates the boundary values. This needs to be called at each iteration.
-         * @param bv The new boundary values
-         */
-        void update_boundary(BoundaryVals bv);
+        */
+        void update_boundary();
 
     private:
         /**
@@ -95,6 +94,12 @@ template<> class SubdomainSolver<1> : protected PDESolver<1> {
          * @return The coefficient at position j,k of the local stiffness matrix
          */
         Real stiff_mat(Index j, Index k) const;
+
+        /**
+         * @brief Computes new boundary values from neighboring subdomains
+         * @param bv The new boundary values to set
+         */
+        void get_new_boundary(BoundaryVals bv);
 };
 
 
@@ -108,9 +113,8 @@ template<size_t dim> class DiscreteSolver : protected PDESolver<dim>{};
  */
 template<> class DiscreteSolver<1> : protected PDESolver<1> {
 
-
     public:
-        DiscreteSolver(const PDEParams &pdep, const SchwarzParams &sp, SolverParams *sp, const Real h);
+        DiscreteSolver(const PDEParams &pdep, const SchwarzParams &sp, SolverParams *solver_params, const Real h);
         ~DiscreteSolver() = default;
 
         /**
@@ -124,6 +128,9 @@ template<> class DiscreteSolver<1> : protected PDESolver<1> {
          * @brief TODO
          */
         void print_to_file();
+
+    protected:
+        std::vector<SubdomainSolver<1>> subdomain_solvers;
 
     private:
         /**
