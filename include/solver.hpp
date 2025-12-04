@@ -108,9 +108,8 @@ template<size_t dim> class DiscreteSolver : protected PDESolver<dim>{};
  */
 template<> class DiscreteSolver<1> : protected PDESolver<1> {
 
-
     public:
-        DiscreteSolver(const PDEParams &pdep, const SchwarzParams &sp, SolverParams *sp, const Real h);
+        DiscreteSolver(const PDEParams &pdep, const SchwarzParams &sp, SolverParams *solver_params, const Real h);
         ~DiscreteSolver() = default;
 
         /**
@@ -124,6 +123,9 @@ template<> class DiscreteSolver<1> : protected PDESolver<1> {
          * @brief TODO
          */
         void print_to_file();
+
+    protected:
+        std::vector<SubdomainSolver<1>> subdomain_solvers;
 
     private:
         /**
