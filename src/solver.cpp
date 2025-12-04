@@ -33,6 +33,12 @@ DiscreteSolver<1>::DiscreteSolver(
     }
 }
 
-// Vector DiscreteSolver<1>::solve() const {
-//     /** TODO implement */
-// }
+Vector DiscreteSolver<1>::solve() const {
+    for (int i = 0; i<max_iter; ++i) {
+        for (auto &subsolver : subdomain_solvers) {
+            subsolver.factorize();
+            subsolver.solve();
+            subsolver.update_boundary();
+        }
+    }
+}
