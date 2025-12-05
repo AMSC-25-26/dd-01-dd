@@ -32,12 +32,14 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${01_DD_DIR}/bin")
 ##############################################
 #              Our Libraries                 #
 ##############################################
+add_library(tridiag src/TridiagUtils.cpp)
 add_library(solver src/solver.cpp)
 
 ##############################################
 #                 Our Tests                  #
 ##############################################
-#add_executable()
+add_executable(test_tridiag test/test_tridiag.cpp)
+target_link_libraries(test_tridiag tridiag)
 
 ##############################################
 #              Our Executables               #
