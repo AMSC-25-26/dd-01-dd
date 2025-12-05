@@ -110,7 +110,7 @@ template<> class DiscreteSolver<1> : protected PDESolver<1> {
 
 
     public:
-        DiscreteSolver(const PDEParams &pdep, const SchwarzParams &sp, SolverParams *sp, const Real h);
+        DiscreteSolver(const PDEParams &pdep, const SchwarzParams &schp, SolverParams *solp, const Real h);
         ~DiscreteSolver() = default;
 
         /**

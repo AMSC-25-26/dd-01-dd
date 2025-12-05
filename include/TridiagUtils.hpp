@@ -3,20 +3,36 @@
 
 #include <types.hpp>
 #include <iostream>
+#include <vector>
+#include <stdexcept>
 
-class FactorizedTridiag  : protected Types<1> {
+class FactorizedTridiag : protected Types<1> {
 private:
-    Vector _lower;  // n-1 elements: l[0] ... l[n-2]
-    Vector _diag;   // n elements:   d[0] ... d[n-1]
-    Vector _upper;  // n-1 elements: u[0] ... u[n-2]
-    Size _n;
+    Vector _lower;  // Lower diagonal (n-1 elements)
+    Vector _diag;   // Main diagonal (n elements)
+    Vector _upper;  // Upper diagonal (n-1 elements)
+    Size _n;        // Dimension of the matrix
+
+    // --- LU Factorization Data ---
+    // U is upper triangular with diagonal _du and super-diagonal _upper (original)
+    // L is unit lower triangular with sub-diagonal multipliers _dl
+    Vector _du;    
+    Vector _dl;     
+
+    bool _is_factorized = false; // Flag to ensure solve() is not called before factorize()
 
 public:
-    FactorizedTridiag(Size n);
+    explicit FactorizedTridiag(Size n);
 
+    // Read-write access. modifying the matrix invalidates the factorization.
     Real& operator()(Index i, Index j);
 
-    Vector solve(const Vector& b);
+    // Read-only access.
+    Real operator()(Index i, Index j) const;
+
+    void factorize();
+
+    Vector solve(const Vector& b) const;
 
     void print() const;
 };
