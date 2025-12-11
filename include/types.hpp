@@ -22,7 +22,8 @@ template<> class Types<Line> {
 
     enum StatusCode {
         Ok,
-        MaxIterReached
+        MaxIterReached,
+        SolveNotAttempted
     };
 
     class Status {
@@ -36,10 +37,14 @@ template<> class Types<Line> {
 
     struct Domain {
         Real a, b;
-    } ;
+    };
 
     struct BoundaryVals{
         Real u_a, u_b; 
+    };
+
+    struct Boundary {
+        Real a, b;
     };
 
     struct SubIndexes {

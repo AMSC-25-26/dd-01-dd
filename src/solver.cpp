@@ -1,43 +1,100 @@
 #include <solver.hpp>
 #include <types.hpp>
 
-PDESolver<Line>::PDESolver(const PDEParams &pde_params, const SchwarzParams &schwarz_params,
-                        const SolverParams &solver_params, Real h) :
-            mu(pde_params.mu),c(pde_params.c),eps(solver_params.eps), delta(schwarz_params.delta),
-            h(h),omega(pde_params.omega),
-            f(pde_params.f),max_iter(solver_params.max_iter),
-            Nsub(schwarz_params.N) {
-    Nnodes = static_cast<int>( (omega.b-omega.a) / h )+1;
+Types<Line>::Boundary PDESolver<Line>::get_subdomain_nonoverlapping_boundary(Index i) const {
+    return {((subdomain_area * i) + omega.a),((subdomain_area * (i+1)) + omega.a)};
+}
+
+Types<Line>::Boundary PDESolver<Line>::get_subdomain_overlapping_boundary(Index i) const {
+    Boundary boundary = get_subdomain_nonoverlapping_boundary(i);
+    if (i!=0) boundary.a -= delta*.5;
+    if (i!=Nsub-1) boundary.b += delta*.5;
+    return boundary;
+}
+
+Types<Line>::Index PDESolver<Line>::get_leftmost_node(Boundary boundary) const {
+    return static_cast<Index>((boundary.a-omega.a)/h)+1;
+}
+
+Types<Line>::Index PDESolver<Line>::get_rightmost_node(Boundary boundary) const {
+    return static_cast<Index>((boundary.b-omega.a)/h);
+}
+
+Types<Line>::Index PDESolver<Line>::get_number_of_contained_nodes(Boundary boundary) const {
+    return get_rightmost_node(boundary)-get_leftmost_node(boundary);
+}
+
+PDESolver<Line>::PDESolver(const PDEParams &pde_params, const SchwarzParams &schwarz_params, Real h) : mu(pde_params.mu),
+                                                                                                       c(pde_params.c), delta(schwarz_params.delta),
+                                                                                                       h(h), omega(pde_params.omega), dirichlet(pde_params.dirichlet),
+                                                                                                       f(pde_params.f),
+                                                                                                       Nsub(schwarz_params.N) {
+    domain_area = omega.b - omega.a;
+    subdomain_area = domain_area/Nsub;
+    Nnodes = static_cast<int>((omega.b - omega.a) / h) + 1;
     /* TODO check conditions:
      * b-a is perfectly divisible by h
      * need b-a != 0
      * maybe more...
      */
-
 }
 
 /** TODO change definition of PDESolver and instantiate normally */
-SubdomainSolver<Line>::SubdomainSolver(const PDEParams &pdep, const SchwarzParams &sp, BoundaryVals *bv, const Real h,
-                                    const Index i) : PDESolver<Line>(pdep,sp, {0.0,0},h), i(i), boundary_values(bv) {
-    /** TODO actually create constructor */
-    ftd = nullptr;
+SubdomainSolver<Line>::SubdomainSolver(const PDEParams &pdep, const SchwarzParams &sp, BoundaryVals bv, const Real h,
+                                    const Index i) : PDESolver<Line>(pdep, sp, h), i(i), boundary_values(bv) {
+    N_overlap = get_number_of_contained_nodes(
+        get_subdomain_overlapping_boundary(i)
+        );
+    N_nonoverlap = get_number_of_contained_nodes(
+        get_subdomain_nonoverlapping_boundary(i)
+        );
+    b.reserve(N_overlap);
+
+    ftd = new FactorizedTridiag(N_overlap);
+
+    ftd(0,0) = 1;
+    ftd(N_overlap-1,N_overlap-1) = 1;
+    for (auto j = 1; j < N_overlap-1; ++j) {
+        ftd(j,j-1) = -mu/(h*h);
+        ftd(j,j) = (2*mu/(h*h))+c;
+        ftd(j,j+1) = -mu/(h*h);
+    }
+
+    b(0) = bv.u_a;
+    b(N_overlap-1) = bv.u_b;
+    for (auto j = 1; j < N_overlap-1; ++j)
+        b(j) = f(this->sub_to_local({i,j}) * h + this->omega.a);
+}
+
+Types<Line>::Vector SubdomainSolver<Line>::solve() const {
+    return ftd->solve(b);
+}
+
+void SubdomainSolver<Line>::factorize() {
+    ftd->factorize();
+}
+
+void SubdomainSolver<Line>::update_boundary(BoundaryVals bv) {
+    boundary_values = bv;
+    b(0) = bv.u_a;
+    b(N_overlap-1) = bv.u_b;
 }
 
 DiscreteSolver<Line>::DiscreteSolver(
     const PDEParams &pdep, const SchwarzParams &sp, SolverParams *solver_params, const Real h
-) : PDESolver<Line>(pdep, sp, *solver_params, h), iter(0), iter_diff(0){
+) : PDESolver<Line>(pdep, sp, h), max_iter(solver_params->max_iter), iter(0), iter_diff(0), eps(solver_params->eps) {
 
+    status.code = SolveNotAttempted;
+    status.message = "You have yet to call solve()";
     // useful renames
     u_k.reserve(Nnodes);
     u_next.reserve(Nnodes);
     subdomain_solvers.reserve(Nsub);
 
     // create a vector of SubdomainSolvers
+    BoundaryVals bv = {0.0,0.0};
     for (auto i = 0; i < Nsub; ++i) {
-        BoundaryVals bv = {0.0, 0.0};
-        subdomain_solvers.emplace_back(
-            SubdomainSolver<Line>(pdep, sp, &bv, h, i)
-        );
+        subdomain_solvers.emplace_back(pdep, sp, bv, h, i);
     }
 }
 
@@ -50,7 +107,7 @@ void DiscreteSolver<Line>::solve() {
 
     iter_diff = eps + 1;
     while (iter++ < max_iter && iter_diff > eps) {
-        u_next = advance();
+        advance();
     }
 
     if (max_iter == iter) {
@@ -82,18 +139,16 @@ void DiscreteSolver<Line>::advance() {
 }
 
 Types<Line>::BoundaryVals DiscreteSolver<Line>::current_boundary_cond(Index i) const {
-
-    Real subdomain_area_nonoverlapping = (omega.b - omega.a) / Nsub;
-    Real a_i = ((subdomain_area_nonoverlapping * i) + omega.a) - delta/2;
-    Real b_i = ((subdomain_area_nonoverlapping * (i+1)) + omega.a) + delta/2;
-    
-    // the index of the leftmost and rightmost node contained in the overlapping subdomain
-    Index leftmost = static_cast<Index>(a_i/h)+1;
-    Index rightmost = static_cast<Index>(b_i/h);
-
+    const Boundary boundary = get_subdomain_overlapping_boundary(i);
+    if (i == 0) {
+        return {dirichlet.u_a,u_k[get_rightmost_node(boundary)]};
+    }
+    if (i == Nsub-1) {
+        return {u_k[get_leftmost_node(boundary)],dirichlet.u_b};
+    }
     return {
-        u_k[leftmost],
-        u_k[rightmost]
+        u_k[get_leftmost_node(boundary)],
+        u_k[get_rightmost_node(boundary)]
     };
 }
 
