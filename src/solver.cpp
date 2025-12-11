@@ -54,11 +54,30 @@ SubdomainSolver<Line>::SubdomainSolver(const PDEParams &pdep, const SchwarzParam
 
     ftd(0,0) = 1;
     ftd(N_overlap-1,N_overlap-1) = 1;
-    for (auto i = 1; i < N_overlap-1; ++i) {
-        ftd(i,i-1) = -mu/(h*h);
-        ftd(i,i) = (2*mu/(h*h))+c;
-        ftd(i,i+1) = -mu/(h*h);
+    for (auto j = 1; j < N_overlap-1; ++j) {
+        ftd(j,j-1) = -mu/(h*h);
+        ftd(j,j) = (2*mu/(h*h))+c;
+        ftd(j,j+1) = -mu/(h*h);
     }
+
+    b(0) = bv.u_a;
+    b(N_overlap-1) = bv.u_b;
+    for (auto j = 1; j < N_overlap-1; ++j)
+        b(j) = f(this->sub_to_local({i,j}) * h + this->omega.a);
+}
+
+Types<Line>::Vector SubdomainSolver<Line>::solve() const {
+    return ftd->solve(b);
+}
+
+void SubdomainSolver<Line>::factorize() {
+    ftd->factorize();
+}
+
+void SubdomainSolver<Line>::update_boundary(BoundaryVals bv) {
+    boundary_values = bv;
+    b(0) = bv.u_a;
+    b(N_overlap-1) = bv.u_b;
 }
 
 DiscreteSolver<Line>::DiscreteSolver(

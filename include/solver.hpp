@@ -98,16 +98,6 @@ template<> class SubdomainSolver<Line> : public PDESolver<Line> {
 
     protected:
     Size N_overlap, N_nonoverlap;
-
-    private:
-        /**
-         * @brief Computes \f$(A_i)_{j,k}\f$
-         * Computes the coefficient at position (j,k) of the local tridiagonal matrix
-         * @param j Row index
-         * @param k Collumn index
-         * @return The coefficient at position j,k of the local stiffness matrix
-         */
-        Real stiff_mat(Index j, Index k) const;
 };
 
 
