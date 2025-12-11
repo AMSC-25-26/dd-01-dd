@@ -5,9 +5,14 @@
 #include <functional>
 #include <type_traits>
 
-template<size_t dim> class Types;
+enum Dimension {
+    Line = 1,
+    Plane = 2
+};
 
-template<> class Types<1> {
+template<Dimension dim> class Types;
+
+template<> class Types<Line> {
     public:
     using Real = double;
     using Index = int;
@@ -44,7 +49,7 @@ template<> class Types<1> {
     };
 };
 
-template<> class Types<2> {
+template<> class Types<Plane> {
     /** TODO: part two of project **/
 };
 
