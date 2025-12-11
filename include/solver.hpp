@@ -14,9 +14,9 @@
 #include <types.hpp>
 #include <TridiagUtils.hpp>
 
-template<size_t dim> class PDESolver : protected Types<dim>{};
+template<Dimension dim> class PDESolver : protected Types<dim>{};
 
-template<> class PDESolver<1> : protected Types<1> {
+template<> class PDESolver<Line> : protected Types<Line> {
     public:
     Real mu, c, eps, delta, h;
     Domain omega;
@@ -42,7 +42,7 @@ template<> class PDESolver<1> : protected Types<1> {
 };
 
 
-template<size_t dim> class SubdomainSolver : protected PDESolver<dim>{};
+template<Dimension dim> class SubdomainSolver : protected PDESolver<dim>{};
 
 /**
  * @class SubdomainSolver
@@ -52,7 +52,7 @@ template<size_t dim> class SubdomainSolver : protected PDESolver<dim>{};
  * The solution is computed by storing the Thomas factorization of the tridiagonal matrix.
  * @see FactorizedTridiag
  */
-template<> class SubdomainSolver<1> : protected PDESolver<1> {
+template<> class SubdomainSolver<Line> : protected PDESolver<Line> {
 
 
     public:
@@ -106,7 +106,7 @@ template<> class SubdomainSolver<1> : protected PDESolver<1> {
 };
 
 
-template<size_t dim> class DiscreteSolver : protected PDESolver<dim>{};
+template<Dimension dim> class DiscreteSolver : protected PDESolver<dim>{};
 
 /**
  * @class DiscreteSolver
@@ -114,7 +114,7 @@ template<size_t dim> class DiscreteSolver : protected PDESolver<dim>{};
  * This class manages the overall solution of the Overlapping Schwarz PDE problem
  * by coordinating the subdomain solvers in parallel and iterating until convergence.
  */
-template<> class DiscreteSolver<1> : protected PDESolver<1> {
+template<> class DiscreteSolver<Line> : protected PDESolver<Line> {
 
     public:
         Status status;
