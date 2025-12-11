@@ -1,6 +1,5 @@
 #include <solver.hpp>
-
-#include "types.hpp"
+#include <types.hpp>
 
 PDESolver<Line>::PDESolver(const PDEParams &pde_params, const SchwarzParams &schwarz_params,
                         const SolverParams &solver_params, Real h) :
@@ -24,27 +23,25 @@ SubdomainSolver<Line>::SubdomainSolver(const PDEParams &pdep, const SchwarzParam
     ftd = nullptr;
 }
 
-DiscreteSolver<1>::DiscreteSolver(
+DiscreteSolver<Line>::DiscreteSolver(
     const PDEParams &pdep, const SchwarzParams &sp, SolverParams *solver_params, const Real h
-) : PDESolver<1>(pdep, sp, *solver_params, h), iter(0), iter_diff(0){
+) : PDESolver<Line>(pdep, sp, *solver_params, h), iter(0), iter_diff(0){
 
     // useful renames
     u_k.reserve(Nnodes);
     u_next.reserve(Nnodes);
     subdomain_solvers.reserve(Nsub);
-    
-    Real subdomain_area_nonoverlapping = (omega.b - omega.a) / Nsub;
 
     // create a vector of SubdomainSolvers
     for (auto i = 0; i < Nsub; ++i) {
         BoundaryVals bv = {0.0, 0.0};
         subdomain_solvers.emplace_back(
-            SubdomainSolver<1>(pdep, sp, &bv, h, i)
+            SubdomainSolver<Line>(pdep, sp, &bv, h, i)
         );
     }
 }
 
-void DiscreteSolver<1>::solve() {
+void DiscreteSolver<Line>::solve() {
     // Initialize u^(0) = u_a + (u_b - u_a) * (x - a) / (b - a)
     Real slope = (dirichlet.u_b-dirichlet.u_a)/(omega.b-omega.a);
     for (Size i = 0; i < Nnodes; ++i) {
@@ -65,13 +62,13 @@ void DiscreteSolver<1>::solve() {
     }
 }
 
-Types<1>::Vector DiscreteSolver<1>::get_solution() const {
+Types<Line>::Vector DiscreteSolver<Line>::get_solution() const {
     return u_k;
 }
 
-void DiscreteSolver<1>::advance() {
+void DiscreteSolver<Line>::advance() {
     u_next.clear();
-    for(auto i=0; i<Nsub; ++ii) {
+    for(auto i=0; i<Nsub; ++i) {
         if (iter == 0) {
             subdomain_solvers[i].factorize();
         }
@@ -84,9 +81,11 @@ void DiscreteSolver<1>::advance() {
     std::swap(u_k, u_next);
 }
 
-Types<1>::BoundaryVals current_boundary_cond(Index i) const {
-    Real a_i = ((subdomain_area_nonoverlapping * i) + omega.a) - sp.delta/2;
-    Real b_i = ((subdomain_area_nonoverlapping * (i+1)) + omega.a) + sp.delta/2;
+Types<Line>::BoundaryVals DiscreteSolver<Line>::current_boundary_cond(Index i) const {
+
+    Real subdomain_area_nonoverlapping = (omega.b - omega.a) / Nsub;
+    Real a_i = ((subdomain_area_nonoverlapping * i) + omega.a) - delta/2;
+    Real b_i = ((subdomain_area_nonoverlapping * (i+1)) + omega.a) + delta/2;
     
     // the index of the leftmost and rightmost node contained in the overlapping subdomain
     Index leftmost = static_cast<Index>(a_i/h)+1;

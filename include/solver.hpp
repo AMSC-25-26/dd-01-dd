@@ -85,8 +85,9 @@ template<> class SubdomainSolver<Line> : protected PDESolver<Line> {
 
         /**
          * @brief Updates the boundary values. This needs to be called at each iteration.
-        */
-        void update_boundary();
+         * @param bv The new boundary values
+         */
+        void update_boundary(BoundaryVals bv);
 
     private:
         /**
@@ -97,12 +98,6 @@ template<> class SubdomainSolver<Line> : protected PDESolver<Line> {
          * @return The coefficient at position j,k of the local stiffness matrix
          */
         Real stiff_mat(Index j, Index k) const;
-
-        /**
-         * @brief Computes new boundary values from neighboring subdomains
-         * @param bv The new boundary values to set
-         */
-        void get_new_boundary(BoundaryVals bv);
 };
 
 
