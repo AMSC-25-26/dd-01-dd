@@ -31,6 +31,7 @@ template<> class Types<1> {
         Real mu, c;
         Function f;
         Domain omega;
+        BoundaryVals dirichlet;
     };
 
     struct SchwarzParams {
