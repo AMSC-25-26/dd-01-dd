@@ -18,13 +18,11 @@ template<Dimension dim> class PDESolver : protected Types<dim>{};
 
 template<> class PDESolver<Line> : protected Types<Line> {
     public:
-    Real mu, c, eps, delta, h;
+    Real mu, c, delta, h;
     Domain omega;
-    BoundaryVals dirichlet;
+    BoundaryVals dirichlet{};
     Function f;
-    /** TODO move these to discrete solver along with SolverParams */
-    int max_iter;
-    Size Nsub, Nnodes;
+    Size Nnodes,Nsub;
 
     protected:
     SubIndexes global_to_sub(Index k) const noexcept;
@@ -35,7 +33,6 @@ template<> class PDESolver<Line> : protected Types<Line> {
     public:
     PDESolver(const PDEParams& pde_params,
               const SchwarzParams& schwarz_params,
-              const SolverParams& solver_params,
               Real h);
     ~PDESolver() = default;
 
@@ -62,6 +59,8 @@ template<> class SubdomainSolver<Line> : protected PDESolver<Line> {
          * @see SubdomainSolver::update_boundary
          */
         BoundaryVals *boundary_values{};
+        Vector b;
+        Size N_i;
         FactorizedTridiag *ftd;             //*< @see FactorizedTridiag
 
         SubdomainSolver(const PDEParams &pdep, const SchwarzParams &sp, BoundaryVals *bv, const Real h, const Index i);
@@ -132,10 +131,11 @@ template<> class DiscreteSolver<Line> : protected PDESolver<Line> {
         void print_to_file();
 
     protected:
+        int max_iter;
         std::vector<SubdomainSolver<1>> subdomain_solvers;
         Vector u_k, u_next;
         Index iter;
-        Real iter_diff;
+        Real iter_diff,eps;
 
 
     private:

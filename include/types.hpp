@@ -22,7 +22,8 @@ template<> class Types<Line> {
 
     enum StatusCode {
         Ok,
-        MaxIterReached
+        MaxIterReached,
+        SolveNotAttempted
     };
 
     class Status {

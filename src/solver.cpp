@@ -1,11 +1,10 @@
 #include <solver.hpp>
 #include <types.hpp>
 
-PDESolver<Line>::PDESolver(const PDEParams &pde_params, const SchwarzParams &schwarz_params,
-                        const SolverParams &solver_params, Real h) :
-            mu(pde_params.mu),c(pde_params.c),eps(solver_params.eps), delta(schwarz_params.delta),
+PDESolver<Line>::PDESolver(const PDEParams &pde_params, const SchwarzParams &schwarz_params, Real h) :
+            mu(pde_params.mu),c(pde_params.c), delta(schwarz_params.delta),
             h(h),omega(pde_params.omega),
-            f(pde_params.f),max_iter(solver_params.max_iter),
+            f(pde_params.f),
             Nsub(schwarz_params.N) {
     Nnodes = static_cast<int>( (omega.b-omega.a) / h )+1;
     /* TODO check conditions:
@@ -18,15 +17,17 @@ PDESolver<Line>::PDESolver(const PDEParams &pde_params, const SchwarzParams &sch
 
 /** TODO change definition of PDESolver and instantiate normally */
 SubdomainSolver<Line>::SubdomainSolver(const PDEParams &pdep, const SchwarzParams &sp, BoundaryVals *bv, const Real h,
-                                    const Index i) : PDESolver<Line>(pdep,sp, {0.0,0},h), i(i), boundary_values(bv) {
+                                    const Index i) : PDESolver<Line>(pdep, sp, h), i(i), boundary_values(bv) {
     /** TODO actually create constructor */
     ftd = nullptr;
 }
 
 DiscreteSolver<Line>::DiscreteSolver(
     const PDEParams &pdep, const SchwarzParams &sp, SolverParams *solver_params, const Real h
-) : PDESolver<Line>(pdep, sp, *solver_params, h), iter(0), iter_diff(0){
+) : PDESolver<Line>(pdep, sp, h), max_iter(solver_params->max_iter), iter(0), iter_diff(0), eps(solver_params->eps) {
 
+    status.code = SolveNotAttempted;
+    status.message = "You have yet to call solve()";
     // useful renames
     u_k.reserve(Nnodes);
     u_next.reserve(Nnodes);
