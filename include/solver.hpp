@@ -20,13 +20,16 @@ template<> class PDESolver<Line> : protected Types<Line> {
     public:
     Real mu, c, eps, delta, h;
     Domain omega;
+    BoundaryVals dirichlet;
     Function f;
     /** TODO move these to discrete solver along with SolverParams */
-    int max_iter, Nsub;
+    int max_iter;
+    Size Nsub, Nnodes;
 
     protected:
-    SubIndexes global_to_sub(Index k) const;
-    Index sub_to_local(SubIndexes ij) const;
+    SubIndexes global_to_sub(Index k) const noexcept;
+    Index sub_to_local(SubIndexes ij) const noexcept;
+    Size nodes_in_subdomain(Index i) const noexcept;
 
     /** TODO Maybe remove constructor */
     public:
@@ -108,9 +111,10 @@ template<Dimension dim> class DiscreteSolver : protected PDESolver<dim>{};
  */
 template<> class DiscreteSolver<Line> : protected PDESolver<Line> {
 
-
     public:
-        DiscreteSolver(const PDEParams &pdep, const SchwarzParams &sp, SolverParams *sp, const Real h);
+        Status status;
+
+        DiscreteSolver(const PDEParams &pdep, const SchwarzParams &sp, SolverParams *solver_params, const Real h);
         ~DiscreteSolver() = default;
 
         /**
@@ -118,12 +122,21 @@ template<> class DiscreteSolver<Line> : protected PDESolver<Line> {
          * by iteratively solving the subdomain problems and updating the boundary conditions.
          * @return The global solution vector
          */
-        Vector solve() const;
+        void solve();
+
+        Vector get_solution() const;
 
         /**
          * @brief TODO
          */
         void print_to_file();
+
+    protected:
+        std::vector<SubdomainSolver<1>> subdomain_solvers;
+        Vector u_k, u_next;
+        Index iter;
+        Real iter_diff;
+
 
     private:
         /**

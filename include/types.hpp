@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <functional>
-#include <type_traits>
+#include <string>
 
 enum Dimension {
     Line = 1,
@@ -16,9 +16,23 @@ template<> class Types<Line> {
     public:
     using Real = double;
     using Index = int;
-    using Size = size_t;
+    using Size = int;
     using Vector = std::vector<Real>;       //TODO decide if std::vector or Eigen::VectorXd
     using Function = std::function<Real(Real)>;
+
+    enum StatusCode {
+        Ok,
+        MaxIterReached
+    };
+
+    class Status {
+    public:
+        std::string message;
+        StatusCode code;
+
+        bool converged() const { return code == StatusCode::Ok; }
+
+    };
 
     struct Domain {
         Real a, b;
@@ -36,6 +50,7 @@ template<> class Types<Line> {
         Real mu, c;
         Function f;
         Domain omega;
+        BoundaryVals dirichlet;
     };
 
     struct SchwarzParams {
