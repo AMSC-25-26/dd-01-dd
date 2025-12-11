@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <functional>
-#include <type_traits>
+#include <string>
 
 template<size_t dim> class Types;
 
@@ -14,6 +14,20 @@ template<> class Types<1> {
     using Size = size_t;
     using Vector = std::vector<Real>;       //TODO decide if std::vector or Eigen::VectorXd
     using Function = std::function<Real(Real)>;
+
+    enum StatusCode {
+        Ok,
+        MaxIterReached
+    };
+
+    class Status {
+    public:
+        std::string message;
+        StatusCode code;
+
+        bool converged() const { return code == StatusCode::Ok; }
+
+    };
 
     struct Domain {
         Real a, b;

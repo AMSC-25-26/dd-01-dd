@@ -20,9 +20,11 @@ template<> class PDESolver<1> : protected Types<1> {
     public:
     Real mu, c, eps, delta, h;
     Domain omega;
+    BoundaryVals dirichlet;
     Function f;
     /** TODO move these to discrete solver along with SolverParams */
-    int max_iter, Nsub;
+    int max_iter;
+    Size Nsub, Nnodes;
 
     protected:
     SubIndexes global_to_sub(Index k) const noexcept;
@@ -115,6 +117,8 @@ template<size_t dim> class DiscreteSolver : protected PDESolver<dim>{};
 template<> class DiscreteSolver<1> : protected PDESolver<1> {
 
     public:
+        Status status;
+
         DiscreteSolver(const PDEParams &pdep, const SchwarzParams &sp, SolverParams *solver_params, const Real h);
         ~DiscreteSolver() = default;
 
@@ -123,7 +127,9 @@ template<> class DiscreteSolver<1> : protected PDESolver<1> {
          * by iteratively solving the subdomain problems and updating the boundary conditions.
          * @return The global solution vector
          */
-        Vector solve() const;
+        void solve();
+
+        Vector get_solution() const;
 
         /**
          * @brief TODO
@@ -132,13 +138,17 @@ template<> class DiscreteSolver<1> : protected PDESolver<1> {
 
     protected:
         std::vector<SubdomainSolver<1>> subdomain_solvers;
+        Vector u_k, u_next;
+        Index iter;
+        Real iter_diff;
+
 
     private:
         /**
          * Advances the computation of one iteration, using SubdomainSolver, on each parallel process.
          * When all processes have completed their iteration, the partial solutions are gathered.
          */
-        void advance();
+        Vector advance();
 
         /**
          * Gathers the partial solutions from each subdomain solver into a single global solution vector and
