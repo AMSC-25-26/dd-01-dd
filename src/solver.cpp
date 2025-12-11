@@ -18,14 +18,14 @@ SubdomainSolver<1>::SubdomainSolver(const PDEParams &pdep, const SchwarzParams &
 DiscreteSolver<1>::DiscreteSolver(
     const PDEParams &pdep, const SchwarzParams &sp, SolverParams *solver_params, const Real h
 ) : PDESolver<1>(pdep, sp, *solver_params, h) {
-    subdomain_solvers.reserve(sp.N);
+    subdomain_solvers.reserve(Nsub);
     
-    Real subdomain_dim_nonoverlapping = (omega.b - omega.a) / sp.N;
+    Real subdomain_area_nonoverlapping = (omega.b - omega.a) / Nsub;
 
     // create a vector of SubdomainSolvers
-    for (auto i = 0; i < sp.N; ++i) {
-        Real a_i = ((subdomain_dim_nonoverlapping * i) + omega.a) - sp.delta/2;
-        Real b_i = ((subdomain_dim_nonoverlapping * (i+1)) + omega.a) + sp.delta/2;
+    for (auto i = 0; i < Nsub; ++i) {
+        Real a_i = ((subdomain_area_nonoverlapping * i) + omega.a) - sp.delta/2;
+        Real b_i = ((subdomain_area_nonoverlapping * (i+1)) + omega.a) + sp.delta/2;
         BoundaryVals bv = {a_i, b_i};
         subdomain_solvers.emplace_back(
             SubdomainSolver<1>(pdep, sp, &bv, h, i)
@@ -34,11 +34,34 @@ DiscreteSolver<1>::DiscreteSolver(
 }
 
 Vector DiscreteSolver<1>::solve() const {
-    for (int i = 0; i<max_iter; ++i) {
-        for (auto &subsolver : subdomain_solvers) {
-            subsolver.factorize();
-            subsolver.solve();
-            subsolver.update_boundary();
+    // Variables to store u^(k) for all subdomains
+    std::vector<Vector> u_current(Nsub);
+    std::vector<Vector> u_prev(Nsub);
+
+    // Initialize u^(0) = u_a + (u_b - u_a) * (x - a) / (b - a)
+    
+    Real subdomain_area = omega.b - omega.a;
+
+    
+
+    for (int i = 0; i < Nsub; i++) {
+        Real x_start = omega.a + i * (subdomain_area / Nsub) - (
+            i==0 ? 0.0 : (delta * 0.5)
+        );
+
+        Size n_nodes = nodes_in_subdomain(i);
+
+        // fill with linear guess
+        for(int j=0; j<n_nodes; j++) {
+            Real x_j = x_start + j * h;
+            Real val_interpolated = boundary_values->u_a + (boundary_values->u_b - boundary_values->u_a) * (x_j - omega.a) / (omega.b - omega.a);
+            u_prev[i].push_back(
+                boundary_values->u_a + (boundary_values->u_b - boundary_values->u_a) * (x_j - omega.a) / (omega.b - omega.a)
+            );
         }
+
+    }
+
+    for (int i = 0; i<max_iter; ++i) {
     }
 }

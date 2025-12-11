@@ -25,8 +25,9 @@ template<> class PDESolver<1> : protected Types<1> {
     int max_iter, Nsub;
 
     protected:
-    SubIndexes global_to_sub(Index k) const;
-    Index sub_to_local(SubIndexes ij) const;
+    SubIndexes global_to_sub(Index k) const noexcept;
+    Index sub_to_local(SubIndexes ij) const noexcept;
+    Size nodes_in_subdomain(Index i) const noexcept;
 
     /** TODO Maybe remove constructor */
     public:
