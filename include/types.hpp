@@ -37,10 +37,14 @@ template<> class Types<Line> {
 
     struct Domain {
         Real a, b;
-    } ;
+    };
 
     struct BoundaryVals{
         Real u_a, u_b; 
+    };
+
+    struct Boundary {
+        Real a, b;
     };
 
     struct SubIndexes {
