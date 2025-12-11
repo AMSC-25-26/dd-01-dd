@@ -148,7 +148,7 @@ template<> class DiscreteSolver<1> : protected PDESolver<1> {
          * Advances the computation of one iteration, using SubdomainSolver, on each parallel process.
          * When all processes have completed their iteration, the partial solutions are gathered.
          */
-        Vector advance();
+        void advance();
 
         /**
          * Gathers the partial solutions from each subdomain solver into a single global solution vector and

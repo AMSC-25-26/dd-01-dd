@@ -11,7 +11,7 @@ template<> class Types<1> {
     public:
     using Real = double;
     using Index = int;
-    using Size = size_t;
+    using Size = int;
     using Vector = std::vector<Real>;       //TODO decide if std::vector or Eigen::VectorXd
     using Function = std::function<Real(Real)>;
 

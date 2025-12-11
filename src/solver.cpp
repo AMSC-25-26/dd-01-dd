@@ -35,9 +35,7 @@ DiscreteSolver<1>::DiscreteSolver(
 
     // create a vector of SubdomainSolvers
     for (auto i = 0; i < Nsub; ++i) {
-        Real a_i = ((subdomain_area_nonoverlapping * i) + omega.a) - sp.delta/2;
-        Real b_i = ((subdomain_area_nonoverlapping * (i+1)) + omega.a) + sp.delta/2;
-        BoundaryVals bv = {a_i, b_i};
+        BoundaryVals bv = {0.0, 0.0};
         subdomain_solvers.emplace_back(
             SubdomainSolver<1>(pdep, sp, &bv, h, i)
         );
@@ -69,8 +67,32 @@ Types<1>::Vector DiscreteSolver<1>::get_solution() const {
     return u_k;
 }
 
-Types<1>::Vector DiscreteSolver<1>::advance() {
-    // TODO implement actuallys
-    return Vector();
+void DiscreteSolver<1>::advance() {
+    u_next.clear();
+    for(auto i=0; i<Nsub; ++ii) {
+        if (iter == 0) {
+            subdomain_solvers[i].factorize();
+        }
+        subdomain_solvers[i].update_boundary(
+            current_boundary_cond(i)
+        );
+        Vector u_i_k = subdomain_solvers[i].solve();
+        u_next.insert(u_next.end(), u_i_k.begin(), u_i_k.end());
+    }
+    std::swap(u_k, u_next);
+}
+
+Types<1>::BoundaryVals current_boundary_cond(Index i) const {
+    Real a_i = ((subdomain_area_nonoverlapping * i) + omega.a) - sp.delta/2;
+    Real b_i = ((subdomain_area_nonoverlapping * (i+1)) + omega.a) + sp.delta/2;
+    
+    // the index of the leftmost and rightmost node contained in the overlapping subdomain
+    Index leftmost = static_cast<Index>(a_i/h)+1;
+    Index rightmost = static_cast<Index>(b_i/h);
+
+    return {
+        u_k[leftmost],
+        u_k[rightmost]
+    };
 }
 
