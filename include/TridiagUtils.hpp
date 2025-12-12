@@ -6,7 +6,7 @@
 #include <vector>
 #include <stdexcept>
 
-class FactorizedTridiag : protected Types<1> {
+class FactorizedTridiag  : protected Types<Line> {
 private:
     Vector _lower;  // Lower diagonal (n-1 elements)
     Vector _diag;   // Main diagonal (n elements)

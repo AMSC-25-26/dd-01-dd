@@ -3,24 +3,48 @@
 
 #include <vector>
 #include <functional>
-#include <type_traits>
+#include <string>
 
-template<size_t dim> class Types;
+enum Dimension {
+    Line = 1,
+    Plane = 2
+};
 
-template<> class Types<1> {
+template<Dimension dim> class Types;
+
+template<> class Types<Line> {
     public:
     using Real = double;
     using Index = int;
-    using Size = size_t;
+    using Size = int;
     using Vector = std::vector<Real>;       //TODO decide if std::vector or Eigen::VectorXd
     using Function = std::function<Real(Real)>;
 
+    enum StatusCode {
+        Ok,
+        MaxIterReached,
+        SolveNotAttempted
+    };
+
+    class Status {
+    public:
+        std::string message;
+        StatusCode code;
+
+        bool converged() const { return code == StatusCode::Ok; }
+
+    };
+
     struct Domain {
         Real a, b;
-    } ;
+    };
 
     struct BoundaryVals{
         Real u_a, u_b; 
+    };
+
+    struct Boundary {
+        Real a, b;
     };
 
     struct SubIndexes {
@@ -31,6 +55,7 @@ template<> class Types<1> {
         Real mu, c;
         Function f;
         Domain omega;
+        BoundaryVals dirichlet;
     };
 
     struct SchwarzParams {
@@ -44,7 +69,7 @@ template<> class Types<1> {
     };
 };
 
-template<> class Types<2> {
+template<> class Types<Plane> {
     /** TODO: part two of project **/
 };
 

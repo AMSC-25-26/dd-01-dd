@@ -14,32 +14,41 @@
 #include <types.hpp>
 #include <TridiagUtils.hpp>
 
-template<size_t dim> class PDESolver : protected Types<dim>{};
+template<Dimension dim> class PDESolver : public Types<dim>{};
 
-template<> class PDESolver<1> : protected Types<1> {
-    public:
-    Real mu, c, eps, delta, h;
+template<> class PDESolver<Line> : public Types<Line> {
+
+public:
+    Real mu, c, delta, h;
     Domain omega;
+    BoundaryVals dirichlet;
     Function f;
-    /** TODO move these to discrete solver along with SolverParams */
-    int max_iter, Nsub;
+    Size Nsub;
 
-    protected:
-    SubIndexes global_to_sub(Index k) const;
-    Index sub_to_local(SubIndexes ij) const;
+    Boundary get_subdomain_nonoverlapping_boundary(Index i) const;
+    Boundary get_subdomain_overlapping_boundary(Index i) const;
+    Index get_leftmost_node(Boundary boundary) const;
+    Index get_rightmost_node(Boundary boundary) const;
+    Index get_number_of_contained_nodes(Boundary boundary) const;
 
     /** TODO Maybe remove constructor */
-    public:
     PDESolver(const PDEParams& pde_params,
               const SchwarzParams& schwarz_params,
-              const SolverParams& solver_params,
               Real h);
     ~PDESolver() = default;
 
+
+    protected:
+    Size Nnodes;
+    Real subdomain_area, domain_area;
+
+    SubIndexes global_to_sub(Index k) const noexcept;
+    Index sub_to_local(SubIndexes ij) const noexcept;
+    Size nodes_in_subdomain(Index i) const noexcept;
 };
 
 
-template<size_t dim> class SubdomainSolver : protected PDESolver<dim>{};
+template<Dimension dim> class SubdomainSolver : public PDESolver<dim>{};
 
 /**
  * @class SubdomainSolver
@@ -49,7 +58,7 @@ template<size_t dim> class SubdomainSolver : protected PDESolver<dim>{};
  * The solution is computed by storing the Thomas factorization of the tridiagonal matrix.
  * @see FactorizedTridiag
  */
-template<> class SubdomainSolver<1> : protected PDESolver<1> {
+template<> class SubdomainSolver<Line> : public PDESolver<Line> {
 
 
     public:
@@ -58,10 +67,11 @@ template<> class SubdomainSolver<1> : protected PDESolver<1> {
          * @brief Contains current values at the boundary, will be updated at each iteration
          * @see SubdomainSolver::update_boundary
          */
-        BoundaryVals *boundary_values{};
+        BoundaryVals boundary_values;
+        Vector b;
         FactorizedTridiag *ftd;             //*< @see FactorizedTridiag
 
-        SubdomainSolver(const PDEParams &pdep, const SchwarzParams &sp, BoundaryVals *bv, const Real h, const Index i);
+        SubdomainSolver(const PDEParams &pdep, const SchwarzParams &sp, BoundaryVals bv, const Real h, const Index i);
         ~SubdomainSolver() = default;
 
         /**
@@ -86,19 +96,12 @@ template<> class SubdomainSolver<1> : protected PDESolver<1> {
          */
         void update_boundary(BoundaryVals bv);
 
-    private:
-        /**
-         * @brief Computes \f$(A_i)_{j,k}\f$
-         * Computes the coefficient at position (j,k) of the local tridiagonal matrix
-         * @param j Row index
-         * @param k Collumn index
-         * @return The coefficient at position j,k of the local stiffness matrix
-         */
-        Real stiff_mat(Index j, Index k) const;
+    protected:
+    Size N_overlap, N_nonoverlap;
 };
 
 
-template<size_t dim> class DiscreteSolver : protected PDESolver<dim>{};
+template<Dimension dim> class DiscreteSolver : public PDESolver<dim>{};
 
 /**
  * @class DiscreteSolver
@@ -106,11 +109,12 @@ template<size_t dim> class DiscreteSolver : protected PDESolver<dim>{};
  * This class manages the overall solution of the Overlapping Schwarz PDE problem
  * by coordinating the subdomain solvers in parallel and iterating until convergence.
  */
-template<> class DiscreteSolver<1> : protected PDESolver<1> {
-
+template<> class DiscreteSolver<Line> : public PDESolver<Line> {
 
     public:
-        DiscreteSolver(const PDEParams &pdep, const SchwarzParams &schp, SolverParams *solp, const Real h);
+        Status status;
+
+        DiscreteSolver(const PDEParams &pdep, const SchwarzParams &sp, SolverParams *solver_params, const Real h);
         ~DiscreteSolver() = default;
 
         /**
@@ -118,12 +122,22 @@ template<> class DiscreteSolver<1> : protected PDESolver<1> {
          * by iteratively solving the subdomain problems and updating the boundary conditions.
          * @return The global solution vector
          */
-        Vector solve() const;
+        void solve();
+
+        Vector get_solution() const;
 
         /**
          * @brief TODO
          */
         void print_to_file();
+
+    protected:
+        int max_iter;
+        std::vector<SubdomainSolver<Line>> subdomain_solvers;
+        Vector u_k, u_next;
+        Index iter;
+        Real iter_diff,eps;
+
 
     private:
         /**
