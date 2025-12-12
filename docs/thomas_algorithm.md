@@ -282,13 +282,13 @@ Almost **2x faster** for iterative methods!
 
 | Method | What it does | Complexity |
 |--------|--------------|------------|
-| `factorize()` | Computes L and U matrices | O(n) |
+| `factorize()` | Computes L and U in-place | O(n) |
 | `solve(b)` | Uses L,U to solve Ax=b | O(n) |
 
-| Storage | Content | Size |
-|---------|---------|------|
-| `_lower` | Original lower diagonal | n-1 |
-| `_diag` | Original main diagonal | n |
-| `_upper` | Original upper diagonal | n-1 |
-| `_dl` | L multipliers (mᵢ) | n-1 |
-| `_du` | U diagonal (ûᵢ) | n |
+| Storage | Before factorize() | After factorize() | Size |
+|---------|-------------------|-------------------|------|
+| `_lower` | Lower diagonal (lᵢ) | L multipliers (mᵢ) | n-1 |
+| `_diag` | Main diagonal (dᵢ) | U diagonal (ûᵢ) | n |
+| `_upper` | Upper diagonal (uᵢ) | Upper diagonal (uᵢ) | n-1 |
+
+**Note:** In-place factorization saves memory (3 vectors instead of 5), but the original matrix is lost after `factorize()`.
