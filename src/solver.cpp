@@ -52,7 +52,7 @@ const Index i) : PDESolver<Line>(pdep, sp, h), i(i), boundary_values(bv), ftd(ge
 
     ftd(0,0) = 1;
     ftd(N_overlap-1,N_overlap-1) = 1;
-    for (Index j = 1; j < (Index)N_overlap-1; ++j) {
+    for (auto j = 1; j < N_overlap-1; ++j) {
         ftd(j,j-1) = -mu/(h*h);
         ftd(j,j) = (2*mu/(h*h))+c;
         ftd(j,j+1) = -mu/(h*h);
@@ -60,7 +60,7 @@ const Index i) : PDESolver<Line>(pdep, sp, h), i(i), boundary_values(bv), ftd(ge
 
     b[0] = bv.u_a;
     b[N_overlap-1] = bv.u_b;
-    for (Index j = 1; j < (Index)N_overlap-1; ++j)
+    for (auto j = 1; j < N_overlap-1; ++j)
         b[j] = f(this->sub_to_local({i,j}) * h + this->omega.a);
 }
 
@@ -99,7 +99,7 @@ DiscreteSolver<Line>::DiscreteSolver(
 void DiscreteSolver<Line>::solve() {
     // Initialize u^(0) = u_a + (u_b - u_a) * (x - a) / (b - a)
     Real slope = (dirichlet.u_b-dirichlet.u_a)/(omega.b-omega.a);
-    for (Size i = 0; i < Nnodes; ++i) {
+    for (auto i = 0; i < Nnodes; ++i) {
         u_k[i] = (static_cast<Real>(i)*h - omega.a)*slope + dirichlet.u_a;
     }
 
