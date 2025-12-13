@@ -50,20 +50,21 @@ SubdomainSolver<Line>::SubdomainSolver(const PDEParams &pdep, const SchwarzParam
         );
     b.reserve(N_overlap);
 
-    ftd = new FactorizedTridiag(N_overlap);
+    ftd = std::make_unique<FactorizedTridiag>(N_overlap);
+    auto & ftd_obj=*ftd;
 
-    ftd(0,0) = 1;
-    ftd(N_overlap-1,N_overlap-1) = 1;
+    ftd_obj(0,0) = 1;
+    ftd_obj(N_overlap-1,N_overlap-1) = 1;
     for (auto j = 1; j < N_overlap-1; ++j) {
-        ftd(j,j-1) = -mu/(h*h);
-        ftd(j,j) = (2*mu/(h*h))+c;
-        ftd(j,j+1) = -mu/(h*h);
+        ftd_obj(j,j-1) = -mu/(h*h);
+        ftd_obj(j,j) = (2*mu/(h*h))+c;
+        ftd_obj(j,j+1) = -mu/(h*h);
     }
 
-    b(0) = bv.u_a;
-    b(N_overlap-1) = bv.u_b;
+    b[0] = bv.u_a;
+    b[N_overlap-1] = bv.u_b;
     for (auto j = 1; j < N_overlap-1; ++j)
-        b(j) = f(this->sub_to_local({i,j}) * h + this->omega.a);
+        b[j] = f(this->sub_to_local({i,j}) * h + this->omega.a);
 }
 
 Types<Line>::Vector SubdomainSolver<Line>::solve() const {
@@ -76,8 +77,8 @@ void SubdomainSolver<Line>::factorize() {
 
 void SubdomainSolver<Line>::update_boundary(BoundaryVals bv) {
     boundary_values = bv;
-    b(0) = bv.u_a;
-    b(N_overlap-1) = bv.u_b;
+    b[0] = bv.u_a;
+    b[N_overlap-1] = bv.u_b;
 }
 
 DiscreteSolver<Line>::DiscreteSolver(

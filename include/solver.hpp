@@ -11,6 +11,7 @@
 #ifndef DD_01_DD_SOLVER_HPP
 #define DD_01_DD_SOLVER_HPP
 
+#include <memory>
 #include <types.hpp>
 #include <TridiagUtils.hpp>
 
@@ -69,7 +70,7 @@ template<> class SubdomainSolver<Line> : public PDESolver<Line> {
          */
         BoundaryVals boundary_values;
         Vector b;
-        FactorizedTridiag *ftd;             //*< @see FactorizedTridiag
+        std::unique_ptr<FactorizedTridiag> ftd;             //*< @see FactorizedTridiag
 
         SubdomainSolver(const PDEParams &pdep, const SchwarzParams &sp, BoundaryVals bv, const Real h, const Index i);
         ~SubdomainSolver() = default;
