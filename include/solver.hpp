@@ -69,9 +69,9 @@ template<> class SubdomainSolver<Line> : public PDESolver<Line> {
          */
         BoundaryVals boundary_values;
         Vector b;
-        FactorizedTridiag *ftd;             //*< @see FactorizedTridiag
+        FactorizedTridiag ftd;              //*< @see FactorizedTridiag
 
-        SubdomainSolver(const PDEParams &pdep, const SchwarzParams &sp, BoundaryVals bv, const Real h, const Index i);
+        SubdomainSolver(const PDEParams &pdep, const SchwarzParams &sp, BoundaryVals bv, Real h, Index i);
         ~SubdomainSolver() = default;
 
         /**
