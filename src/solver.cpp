@@ -24,6 +24,12 @@ Types<Line>::Index PDESolver<Line>::get_number_of_contained_nodes(Boundary bound
     return get_rightmost_node(boundary)-get_leftmost_node(boundary);
 }
 
+// get global node index from (subdomain index, local node index)
+// TODO: verify correctness
+Types<Line>::Index PDESolver<Line>::sub_to_local(SubIndexes sub) const noexcept {
+    return get_leftmost_node(get_subdomain_overlapping_boundary(sub.i)) + sub.j;
+}
+
 PDESolver<Line>::PDESolver(const PDEParams &pde_params, const SchwarzParams &schwarz_params, Real h) : mu(pde_params.mu),
                                                                                                        c(pde_params.c), delta(schwarz_params.delta),
                                                                                                        h(h), omega(pde_params.omega), dirichlet(pde_params.dirichlet),
