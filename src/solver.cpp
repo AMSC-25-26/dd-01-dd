@@ -49,7 +49,6 @@ const Index i) : PDESolver<Line>(pdep, sp, h), i(i), boundary_values(bv), ftd(ge
         get_subdomain_nonoverlapping_boundary(i)
         );
     b.reserve(N_overlap);
-    ftd = FactorizedTridiag(N_overlap);
 
     ftd(0,0) = 1;
     ftd(N_overlap-1,N_overlap-1) = 1;
