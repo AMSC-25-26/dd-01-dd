@@ -40,8 +40,8 @@ PDESolver<Line>::PDESolver(const PDEParams &pde_params, const SchwarzParams &sch
 }
 
 /** TODO change definition of PDESolver and instantiate normally */
-SubdomainSolver<Line>::SubdomainSolver(const PDEParams &pdep, const SchwarzParams &sp, BoundaryVals bv, Real h,
-                                    Index i) : PDESolver<Line>(pdep, sp, h), i(i), boundary_values(bv), ftd(0) {
+SubdomainSolver<Line>::SubdomainSolver(const PDEParams &pdep, const SchwarzParams &sp, BoundaryVals bv, const Real h,
+                                    const Index i) : PDESolver<Line>(pdep, sp, h), i(i), boundary_values(bv), ftd(0) {
     N_overlap = get_number_of_contained_nodes(
         get_subdomain_overlapping_boundary(i)
         );
