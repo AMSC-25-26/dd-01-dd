@@ -3,20 +3,30 @@
 
 #include <types.hpp>
 #include <iostream>
+#include <vector>
+#include <stdexcept>
 
 class FactorizedTridiag  : protected Types<Line> {
 private:
-    Vector _lower;  // n-1 elements: l[0] ... l[n-2]
-    Vector _diag;   // n elements:   d[0] ... d[n-1]
-    Vector _upper;  // n-1 elements: u[0] ... u[n-2]
+    Vector _lower;  
+    Vector _diag;  
+    Vector _upper;
     Size _n;
+
+    bool _is_factorized = false;
 
 public:
     FactorizedTridiag(Size n);
 
+    // Read-write access. modifying the matrix invalidates the factorization.
     Real& operator()(Index i, Index j);
 
-    Vector solve(const Vector& b);
+    // Read-only access.
+    Real operator()(Index i, Index j) const;
+
+    void factorize();
+
+    Vector solve(const Vector& b) const;
 
     void print() const;
 };
