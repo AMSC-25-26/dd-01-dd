@@ -41,6 +41,9 @@ add_library(solver src/solver.cpp)
 add_executable(test_tridiag test/test_tridiag.cpp)
 target_link_libraries(test_tridiag tridiag)
 
+add_executable(test_solver test/test_solver.cpp)
+target_link_libraries(test_solver solver tridiag)
+
 ##############################################
 #              Our Executables               #
 ##############################################
