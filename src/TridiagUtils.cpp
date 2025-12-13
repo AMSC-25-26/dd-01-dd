@@ -77,19 +77,17 @@ Vector FactorizedTridiag::solve(const Vector& b) const {
         throw std::invalid_argument("Vector b size must match matrix size");
     }
 
-    Vector y(_n);
-    Vector x(_n);
+    Vector x(b);  // copy b into x
 
-    // Forward substitution: L·y = b
-    y[0] = b[0];
+    // Forward substitution: L·y = b (result in x)
     for (Size i = 1; i < _n; ++i) {
-        y[i] = b[i] - _lower[i - 1] * y[i - 1];  // _lower now contains mᵢ
+        x[i] -= _lower[i - 1] * x[i - 1];
     }
 
     // Backward substitution: U·x = y
-    x[_n - 1] = y[_n - 1] / _diag[_n - 1];       // _diag now contains ûᵢ
+    x.back() /= _diag.back();
     for (Index i = (Index)_n - 2; i >= 0; --i) {
-        x[i] = (y[i] - _upper[i] * x[i + 1]) / _diag[i];
+        x[i] = (x[i] - _upper[i] * x[i + 1]) / _diag[i];
     }
 
     return x;
