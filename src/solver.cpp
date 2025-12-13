@@ -40,8 +40,8 @@ PDESolver<Line>::PDESolver(const PDEParams &pde_params, const SchwarzParams &sch
 }
 
 /** TODO change definition of PDESolver and instantiate normally */
-SubdomainSolver<Line>::SubdomainSolver(const PDEParams &pdep, const SchwarzParams &sp, BoundaryVals bv, const Real h,
-                                    const Index i) : PDESolver<Line>(pdep, sp, h), i(i), boundary_values(bv) {
+SubdomainSolver<Line>::SubdomainSolver(const PDEParams &pdep, const SchwarzParams &sp, BoundaryVals bv,const Real h,
+const Index i) : PDESolver<Line>(pdep, sp, h), i(i), boundary_values(bv), ftd(get_number_of_contained_nodes(get_subdomain_overlapping_boundary(i))) {
     N_overlap = get_number_of_contained_nodes(
         get_subdomain_overlapping_boundary(i)
         );
@@ -49,8 +49,6 @@ SubdomainSolver<Line>::SubdomainSolver(const PDEParams &pdep, const SchwarzParam
         get_subdomain_nonoverlapping_boundary(i)
         );
     b.reserve(N_overlap);
-
-    ftd = new FactorizedTridiag(N_overlap);
 
     ftd(0,0) = 1;
     ftd(N_overlap-1,N_overlap-1) = 1;
@@ -60,24 +58,24 @@ SubdomainSolver<Line>::SubdomainSolver(const PDEParams &pdep, const SchwarzParam
         ftd(j,j+1) = -mu/(h*h);
     }
 
-    b(0) = bv.u_a;
-    b(N_overlap-1) = bv.u_b;
+    b[0] = bv.u_a;
+    b[N_overlap-1] = bv.u_b;
     for (auto j = 1; j < N_overlap-1; ++j)
-        b(j) = f(this->sub_to_local({i,j}) * h + this->omega.a);
+        b[j] = f(this->sub_to_local({i,j}) * h + this->omega.a);
 }
 
 Types<Line>::Vector SubdomainSolver<Line>::solve() const {
-    return ftd->solve(b);
+    return ftd.solve(b);
 }
 
 void SubdomainSolver<Line>::factorize() {
-    ftd->factorize();
+    ftd.factorize();
 }
 
 void SubdomainSolver<Line>::update_boundary(BoundaryVals bv) {
     boundary_values = bv;
-    b(0) = bv.u_a;
-    b(N_overlap-1) = bv.u_b;
+    b[0] = bv.u_a;
+    b[N_overlap-1] = bv.u_b;
 }
 
 DiscreteSolver<Line>::DiscreteSolver(
@@ -86,7 +84,7 @@ DiscreteSolver<Line>::DiscreteSolver(
 
     status.code = SolveNotAttempted;
     status.message = "You have yet to call solve()";
-    // useful renames
+
     u_k.reserve(Nnodes);
     u_next.reserve(Nnodes);
     subdomain_solvers.reserve(Nsub);
@@ -101,7 +99,7 @@ DiscreteSolver<Line>::DiscreteSolver(
 void DiscreteSolver<Line>::solve() {
     // Initialize u^(0) = u_a + (u_b - u_a) * (x - a) / (b - a)
     Real slope = (dirichlet.u_b-dirichlet.u_a)/(omega.b-omega.a);
-    for (Size i = 0; i < Nnodes; ++i) {
+    for (auto i = 0; i < Nnodes; ++i) {
         u_k[i] = (static_cast<Real>(i)*h - omega.a)*slope + dirichlet.u_a;
     }
 
