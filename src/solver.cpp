@@ -48,7 +48,7 @@ SubdomainSolver<Line>::SubdomainSolver(const PDEParams &pdep, const SchwarzParam
     N_nonoverlap = get_number_of_contained_nodes(
         get_subdomain_nonoverlapping_boundary(i)
         );
-    b.resize(N_overlap);
+    b.reserve(N_overlap);
     ftd = FactorizedTridiag(N_overlap);
 
     ftd(0,0) = 1;
@@ -86,8 +86,8 @@ DiscreteSolver<Line>::DiscreteSolver(
     status.code = SolveNotAttempted;
     status.message = "You have yet to call solve()";
 
-    u_k.resize(Nnodes);
-    u_next.resize(Nnodes);
+    u_k.reserve(Nnodes);
+    u_next.reserve(Nnodes);
     subdomain_solvers.reserve(Nsub);
 
     // create a vector of SubdomainSolvers
