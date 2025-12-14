@@ -30,6 +30,7 @@ template<> class Types<Line> {
     public:
         std::string message;
         StatusCode code;
+        int iter;
 
         bool converged() const { return code == StatusCode::Ok; }
 
