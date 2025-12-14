@@ -92,7 +92,7 @@ int main() {
 
     // Configure Solver Parameters
     SolverParams solver_params;
-    solver_params.max_iter = 1000;
+    solver_params.max_iter = 10000;
     solver_params.eps = 1e-6;
 
     // -----------------------------------------------------
@@ -130,7 +130,7 @@ int main() {
         std::cout << "\n-------------------------------------------" << std::endl;
         std::cout << "Results:" << std::endl;
         std::cout << "  Status: " << (solver.status.converged() ? "SUCCESS" : "FAILURE") << std::endl;
-        // std::cout << "  Iterations:       " << solver.status.iter << std::endl;
+        std::cout << "  Iterations:       " << solver.status.iter << std::endl;
         std::cout << "  L2 Error Norm:    " << l2_error << std::endl;
         std::cout << "-------------------------------------------" << std::endl;
 

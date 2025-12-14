@@ -54,7 +54,8 @@ const Index i) : PDESolver<Line>(pdep, sp, h), i(i), boundary_values(bv), ftd(ge
     N_nonoverlap = get_number_of_contained_nodes(
         get_subdomain_nonoverlapping_boundary(i)
         );
-    b.reserve(N_overlap);
+    b.resize(N_overlap);
+    ftd = FactorizedTridiag(N_overlap);
 
     ftd(0,0) = 1;
     ftd(N_overlap-1,N_overlap-1) = 1;
@@ -91,9 +92,9 @@ DiscreteSolver<Line>::DiscreteSolver(
     status.code = SolveNotAttempted;
     status.message = "You have yet to call solve()";
 
-    u_k.reserve(Nnodes);
-    u_next.reserve(Nnodes);
-    subdomain_solvers.reserve(Nsub);
+    u_k.resize(Nnodes);
+    u_next.resize(Nnodes);
+    subdomain_solvers.reserve(Nsub);  // reserve is OK here - we use emplace_back
 
     // create a vector of SubdomainSolvers
     BoundaryVals bv = {0.0,0.0};
@@ -109,11 +110,17 @@ void DiscreteSolver<Line>::solve() {
         u_k[i] = (static_cast<Real>(i)*h - omega.a)*slope + dirichlet.u_a;
     }
 
+    // Factorize all subdomain matrices once before iterations
+    for (auto i = 0; i < Nsub; ++i) {
+        subdomain_solvers[i].factorize();
+    }
+
     iter_diff = eps + 1;
     while (iter++ < max_iter && iter_diff > eps) {
         advance();
     }
 
+    status.iter = iter;
     if (max_iter == iter) {
         status.message = "Maximum number of iterations exceeded";
         status.code = MaxIterReached;
@@ -128,17 +135,44 @@ Types<Line>::Vector DiscreteSolver<Line>::get_solution() const {
 }
 
 void DiscreteSolver<Line>::advance() {
-    u_next.clear();
-    for(auto i=0; i<Nsub; ++i) {
-        if (iter == 0) {
-            subdomain_solvers[i].factorize();
-        }
-        subdomain_solvers[i].update_boundary(
-            current_boundary_cond(i)
-        );
-        Vector u_i_k = subdomain_solvers[i].solve();
-        u_next.insert(u_next.end(), u_i_k.begin(), u_i_k.end());
+    if (u_next.size() != Nnodes) {
+        u_next.resize(Nnodes);
     }
+
+    // #pragma omp parallel for
+    for (int i = 0; i < Nsub; ++i) {
+        if (iter == 0) {
+            subdomain_solvers[i].factorize(); 
+        }
+
+        subdomain_solvers[i].update_boundary(current_boundary_cond(i));
+
+        Vector u_i_k = subdomain_solvers[i].solve(); 
+
+        Boundary non_overlap_bnd = get_subdomain_nonoverlapping_boundary(i);
+        
+        Index global_start = get_leftmost_node(non_overlap_bnd);
+        Index global_end   = get_rightmost_node(non_overlap_bnd); 
+
+        Boundary overlap_bnd = get_subdomain_overlapping_boundary(i);
+        Index overlap_start_global = get_leftmost_node(overlap_bnd);
+        
+        Index local_offset = global_start - overlap_start_global;
+
+        for (Index k = global_start; k < global_end; ++k) {
+            Index local_idx = local_offset + (k - global_start);
+            u_next[k] = u_i_k[local_idx];
+        }
+    }
+
+    iter_diff = 0.0;
+    for (auto i = 0; i < Nnodes; ++i) {
+        Real diff = std::abs(u_next[i] - u_k[i]);
+        if (diff > iter_diff) {
+            iter_diff = diff;
+        }
+    }
+
     std::swap(u_k, u_next);
 }
 
