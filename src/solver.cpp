@@ -13,7 +13,7 @@ Types<Line>::Boundary PDESolver<Line>::get_subdomain_overlapping_boundary(Index 
 }
 
 Types<Line>::Index PDESolver<Line>::get_leftmost_node(Boundary boundary) const {
-    return static_cast<Index>((boundary.a-omega.a)/h)+1;
+    return static_cast<Index>((boundary.a-omega.a)/h);
 }
 
 Types<Line>::Index PDESolver<Line>::get_rightmost_node(Boundary boundary) const {
@@ -21,7 +21,8 @@ Types<Line>::Index PDESolver<Line>::get_rightmost_node(Boundary boundary) const 
 }
 
 Types<Line>::Index PDESolver<Line>::get_number_of_contained_nodes(Boundary boundary) const {
-    return get_rightmost_node(boundary)-get_leftmost_node(boundary);
+    // +1 because both endpoints are included in the discrete grid
+    return get_rightmost_node(boundary) - get_leftmost_node(boundary) + 1;
 }
 
 // get global node index from (subdomain index, local node index)
@@ -48,14 +49,9 @@ PDESolver<Line>::PDESolver(const PDEParams &pde_params, const SchwarzParams &sch
 /** TODO change definition of PDESolver and instantiate normally */
 SubdomainSolver<Line>::SubdomainSolver(const PDEParams &pdep, const SchwarzParams &sp, BoundaryVals bv,const Real h,
 const Index i) : PDESolver<Line>(pdep, sp, h), i(i), boundary_values(bv), ftd(get_number_of_contained_nodes(get_subdomain_overlapping_boundary(i))) {
-    N_overlap = get_number_of_contained_nodes(
-        get_subdomain_overlapping_boundary(i)
-        );
-    N_nonoverlap = get_number_of_contained_nodes(
-        get_subdomain_nonoverlapping_boundary(i)
-        );
+    N_overlap = get_number_of_contained_nodes(get_subdomain_overlapping_boundary(i));
+    N_nonoverlap = get_number_of_contained_nodes(get_subdomain_nonoverlapping_boundary(i));
     b.resize(N_overlap);
-    ftd = FactorizedTridiag(N_overlap);
 
     ftd(0,0) = 1;
     ftd(N_overlap-1,N_overlap-1) = 1;
@@ -67,8 +63,10 @@ const Index i) : PDESolver<Line>(pdep, sp, h), i(i), boundary_values(bv), ftd(ge
 
     b[0] = bv.u_a;
     b[N_overlap-1] = bv.u_b;
-    for (auto j = 1; j < N_overlap-1; ++j)
-        b[j] = f(this->sub_to_local({i,j}) * h + this->omega.a);
+    for (auto j = 1; j < N_overlap-1; ++j) {
+        const Real xj = (static_cast<Real>(sub_to_local({i, j})) * h) + omega.a;
+        b[j] = f(xj);
+    }
 }
 
 Types<Line>::Vector SubdomainSolver<Line>::solve() const {
@@ -159,11 +157,15 @@ void DiscreteSolver<Line>::advance() {
         
         Index local_offset = global_start - overlap_start_global;
 
-        for (Index k = global_start; k < global_end; ++k) {
+        for (Index k = global_start; k <= global_end; ++k) {
             Index local_idx = local_offset + (k - global_start);
             u_next[k] = u_i_k[local_idx];
         }
     }
+
+    // Enforce Dirichlet boundaries explicitly
+    u_next.front() = dirichlet.u_a;
+    u_next.back() = dirichlet.u_b;
 
     iter_diff = 0.0;
     for (auto i = 0; i < Nnodes; ++i) {
