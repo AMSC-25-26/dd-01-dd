@@ -54,7 +54,7 @@ int main() {
     Real pi = 3.141592653589793;
     
     // Domain [0, 1]
-    Domain omega = {0.0, 1.0}; 
+    Domain omega = {0.0, 5.0}; 
     
     // Boundary Values u(0)=0, u(1)=0
     BoundaryVals dirichlet_bcs = {0.0, 0.0};
@@ -72,7 +72,7 @@ int main() {
     // -----------------------------------------------------
     // 2. Discretization & Solver Parameters
     // -----------------------------------------------------
-    Size N_nodes = 101;
+    Size N_nodes = 501;
     Real h = (omega.b - omega.a) / (N_nodes - 1);
     
     // Configure PDE Parameters
@@ -138,6 +138,7 @@ int main() {
         // Assertion for automated testing
         if (l2_error < 1e-3) {
             std::cout << "[PASSED] Error is within acceptable bounds." << std::endl;
+            solver.print_to_file();
             return 0;
         } else {
             std::cerr << "[FAILED] Error is too high." << std::endl;

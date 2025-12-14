@@ -1,6 +1,10 @@
 #include <solver.hpp>
 #include <types.hpp>
 
+#include <fstream>
+#include <iomanip>
+#include <stdexcept>
+
 Types<Line>::Boundary PDESolver<Line>::get_subdomain_nonoverlapping_boundary(Index i) const {
     return {((subdomain_area * i) + omega.a),((subdomain_area * (i+1)) + omega.a)};
 }
@@ -192,3 +196,46 @@ Types<Line>::BoundaryVals DiscreteSolver<Line>::current_boundary_cond(Index i) c
     };
 }
 
+void DiscreteSolver<Line>::print_to_file() {
+    std::string filename = "../outputs/solution.vtk";
+    if (status.code != SolveNotAttempted) {
+        filename = "../outputs/solution_iter_" + std::to_string(status.iter) + ".vtk";
+    }
+
+    std::ofstream out(filename);
+    if (!out.is_open()) {
+        throw std::runtime_error(
+            "Unable to open output file: " + filename +
+            " (ensure the 'outputs' directory exists)"
+        );
+    }
+
+    // Legacy VTK (ASCII) that ParaView can open.
+    // We use a 3D rectilinear grid with dimensions (Nnodes, 1, 1).
+    out << "# vtk DataFile Version 3.0\n";
+    out << "1D solution on uniform mesh\n";
+    out << "ASCII\n";
+    out << "DATASET RECTILINEAR_GRID\n";
+    out << "DIMENSIONS " << Nnodes << " 1 1\n";
+
+    out << std::setprecision(17);
+
+    out << "X_COORDINATES " << Nnodes << " double\n";
+    for (Index i = 0; i < Nnodes; ++i) {
+        const Real x = omega.a + static_cast<Real>(i) * h;
+        out << x;
+        if (i + 1 < Nnodes) out << ' ';
+        if ((i + 1) % 6 == 0) out << '\n';
+    }
+    out << "\n";
+
+    out << "Y_COORDINATES 1 double\n0\n";
+    out << "Z_COORDINATES 1 double\n0\n";
+
+    out << "POINT_DATA " << Nnodes << "\n";
+    out << "SCALARS u double 1\n";
+    out << "LOOKUP_TABLE default\n";
+    for (Index i = 0; i < Nnodes; ++i) {
+        out << u_k[i] << "\n";
+    }
+}
