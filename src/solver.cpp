@@ -112,14 +112,10 @@ void DiscreteSolver<Line>::solve() {
         u_k[i] = (static_cast<Real>(i)*h - omega.a)*slope + dirichlet.u_a;
     }
 
-    // Factorize all subdomain matrices once before iterations
-    for (auto i = 0; i < Nsub; ++i) {
-        subdomain_solvers[i].factorize();
-    }
-
     iter_diff = eps + 1;
-    while (iter++ < max_iter && iter_diff > eps) {
+    while (iter < max_iter && iter_diff > eps) {
         advance();
+        iter++;
     }
 
     status.iter = iter;
