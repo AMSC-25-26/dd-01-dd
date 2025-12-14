@@ -137,7 +137,7 @@ void DiscreteSolver<Line>::advance() {
         u_next.resize(Nnodes);
     }
 
-    // #pragma omp parallel for
+    #pragma omp parallel for
     for (int i = 0; i < Nsub; ++i) {
         if (iter == 0) {
             subdomain_solvers[i].factorize(); 

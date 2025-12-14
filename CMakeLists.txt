@@ -14,7 +14,7 @@ find_package(MPI REQUIRED)
 set(CMAKE_CXX_COMPILER "${MPI_CXX_COMPILER}")
 
 # Locate OpenMP
-find_package(OpenMP)
+find_package(OpenMP REQUIRED)
 if(OpenMP_CXX_FOUND)
     message(STATUS "OpenMP Correctly Initialized")
 endif()
@@ -35,29 +35,31 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${01_DD_DIR}/bin")
 add_library(tridiag src/TridiagUtils.cpp)
 add_library(solver src/solver.cpp)
 
+target_link_libraries(solver PRIVATE OpenMP::OpenMP_CXX)
+
 ##############################################
 #                 Our Tests                  #
 ##############################################
 add_executable(test_tridiag test/test_tridiag.cpp)
-target_link_libraries(test_tridiag tridiag)
+target_link_libraries(test_tridiag tridiag OpenMP::OpenMP_CXX)
 
 add_executable(test_solver test/test_solver.cpp)
-target_link_libraries(test_solver solver tridiag)
+target_link_libraries(test_solver solver tridiag OpenMP::OpenMP_CXX)
 
 add_executable(test_solver_highfreq test/test_solver_highfreq.cpp)
-target_link_libraries(test_solver_highfreq solver tridiag)
+target_link_libraries(test_solver_highfreq solver tridiag OpenMP::OpenMP_CXX)
 
 add_executable(test_solver_reaction test/test_solver_reaction.cpp)
-target_link_libraries(test_solver_reaction solver tridiag)
+target_link_libraries(test_solver_reaction solver tridiag OpenMP::OpenMP_CXX)
 
 add_executable(test_solver_polynomial test/test_solver_polynomial.cpp)
-target_link_libraries(test_solver_polynomial solver tridiag)
+target_link_libraries(test_solver_polynomial solver tridiag OpenMP::OpenMP_CXX)
 
 add_executable(test_solver_shifted_domain test/test_solver_shifted_domain.cpp)
-target_link_libraries(test_solver_shifted_domain solver tridiag)
+target_link_libraries(test_solver_shifted_domain solver tridiag OpenMP::OpenMP_CXX)
 
 add_executable(test_solver_overlap_steep test/test_solver_overlap_steep.cpp)
-target_link_libraries(test_solver_overlap_steep solver tridiag)
+target_link_libraries(test_solver_overlap_steep solver tridiag OpenMP::OpenMP_CXX)
 
 ##############################################
 #              Our Executables               #
