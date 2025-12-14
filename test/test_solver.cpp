@@ -129,7 +129,8 @@ int main() {
 
         std::cout << "\n-------------------------------------------" << std::endl;
         std::cout << "Results:" << std::endl;
-        std::cout << "  Status: " << (solver.status.converged() ? "SUCCESS" : "FAILURE") << std::endl;
+        std::cout << "  Status: " << (solver.status.converged() ? "CONVERGED" : "NOT CONVERGED") << std::endl;
+        std::cout << "  Status message: " << solver.status.message << std::endl;
         std::cout << "  Iterations:       " << solver.status.iter << std::endl;
         std::cout << "  L2 Error Norm:    " << l2_error << std::endl;
         std::cout << "-------------------------------------------" << std::endl;

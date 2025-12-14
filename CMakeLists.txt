@@ -44,6 +44,21 @@ target_link_libraries(test_tridiag tridiag)
 add_executable(test_solver test/test_solver.cpp)
 target_link_libraries(test_solver solver tridiag)
 
+add_executable(test_solver_highfreq test/test_solver_highfreq.cpp)
+target_link_libraries(test_solver_highfreq solver tridiag)
+
+add_executable(test_solver_reaction test/test_solver_reaction.cpp)
+target_link_libraries(test_solver_reaction solver tridiag)
+
+add_executable(test_solver_polynomial test/test_solver_polynomial.cpp)
+target_link_libraries(test_solver_polynomial solver tridiag)
+
+add_executable(test_solver_shifted_domain test/test_solver_shifted_domain.cpp)
+target_link_libraries(test_solver_shifted_domain solver tridiag)
+
+add_executable(test_solver_overlap_steep test/test_solver_overlap_steep.cpp)
+target_link_libraries(test_solver_overlap_steep solver tridiag)
+
 ##############################################
 #              Our Executables               #
 ##############################################
