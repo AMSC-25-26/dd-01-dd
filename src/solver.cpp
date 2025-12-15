@@ -149,18 +149,18 @@ void DiscreteSolver<Line>::advance() {
         Vector u_i_k = subdomain_solvers[i].solve(); 
 
         Boundary non_overlap_bnd = get_subdomain_nonoverlapping_boundary(i);
-        
-        Index global_start = get_leftmost_node(non_overlap_bnd);
-        Index global_end   = get_rightmost_node(non_overlap_bnd); 
-
         Boundary overlap_bnd = get_subdomain_overlapping_boundary(i);
-        Index overlap_start_global = get_leftmost_node(overlap_bnd);
-        
-        Index local_offset = global_start - overlap_start_global;
 
-        for (Index k = global_start; k <= global_end; ++k) {
-            Index local_idx = local_offset + (k - global_start);
-            u_next[k] = u_i_k[local_idx];
+        Index first_node_nonoverlap = get_leftmost_node(non_overlap_bnd);
+        Index first_node_overlap = get_leftmost_node(overlap_bnd);
+
+        Index last_node_nonoverlap   = get_rightmost_node(non_overlap_bnd);
+
+        Index local_offset = first_node_nonoverlap - first_node_overlap;
+
+        for (Index k = first_node_nonoverlap; k <= last_node_nonoverlap; ++k) {
+            Index local_node = local_offset + (k - first_node_nonoverlap);
+            u_next[k] = u_i_k[local_node];
         }
     }
 
