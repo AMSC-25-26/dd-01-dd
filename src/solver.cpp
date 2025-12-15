@@ -164,9 +164,9 @@ void DiscreteSolver<Line>::advance() {
         }
     }
 
-    // Enforce Dirichlet boundaries explicitly
-    u_next.front() = dirichlet.u_a;
-    u_next.back() = dirichlet.u_b;
+    // Enforce Dirichlet boundaries explicitly for debug
+    // u_next.front() = dirichlet.u_a;
+    // u_next.back() = dirichlet.u_b;
 
     iter_diff = 0.0;
     for (auto i = 0; i < Nnodes; ++i) {
