@@ -28,7 +28,6 @@ int main() {
     std::cout << "  Schwarz Solver Test: high-frequency sine\n";
     std::cout << "===========================================\n";
 
-    const Real pi = 3.141592653589793;
     const Domain omega = {0.0, 1.0};
     const BoundaryVals dirichlet_bcs = {0.0, 0.0};
 
@@ -40,8 +39,8 @@ int main() {
     pde_params.c = 0.0;
     pde_params.omega = omega;
     pde_params.dirichlet = dirichlet_bcs;
-    pde_params.f = [pi](Real x) {
-        return 9.0 * pi * pi * std::sin(3.0 * pi * x); // -u'' = 9 pi^2 sin(3 pi x)
+    pde_params.f = [](Real x) {
+        return 9.0 * M_PI * M_PI * std::sin(3.0 * M_PI * x); // -u'' = 9 pi^2 sin(3 pi x)
     };
 
     SchwarzParams schwarz_params{};
@@ -52,11 +51,11 @@ int main() {
     solver_params.max_iter = 20000;
     solver_params.eps = 1e-8;
 
-    auto exact_solution = [pi](Real x) {
-        return std::sin(3.0 * pi * x);
+    auto exact_solution = [](Real x) {
+        return std::sin(3.0 * M_PI * x);
     };
 
-    DiscreteSolver<Line> solver(pde_params, schwarz_params, &solver_params, h);
+    DiscreteSolver<Line> solver(pde_params, schwarz_params, solver_params, h);
 
     std::cout << "Solving system (high-frequency) ..." << std::endl;
     solver.solve();
@@ -69,11 +68,14 @@ int main() {
 
     Real l2_error = compute_L2_error(u_num, exact_solution, h);
 
-    std::cout << "\nResults:" << std::endl;
-    std::cout << "  Status: " << (solver.status.converged() ? "CONVERGED" : "NOT CONVERGED") << std::endl;
-    std::cout << "  Status message: " << solver.status.message << std::endl;
-    std::cout << "  Iterations:       " << solver.status.iter << std::endl;
-    std::cout << "  L2 Error Norm:    " << l2_error << std::endl;
+    std::cout << "\n-------------------------------------------" << std::endl;
+    std::cout << "Results:" << std::endl;
+    std::cout << "\tStatus:           " << (solver.status.converged() ? "CONVERGED" : "NOT CONVERGED") << std::endl;
+    std::cout << "\tStatus message:   " << solver.status.message << std::endl;
+    std::cout << "\tIterations:       " << solver.iter << std::endl;
+    std::cout << "\tResidual:         " << solver.iter_diff << std::endl;
+    std::cout << "\tL2 Error Norm:    " << l2_error << std::endl;
+    std::cout << "-------------------------------------------" << std::endl;
 
     if (l2_error < 2e-3) {
         std::cout << "[PASSED] High-frequency error within tolerance." << std::endl;

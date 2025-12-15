@@ -32,9 +32,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${01_DD_DIR}/bin")
 ##############################################
 #              Our Libraries                 #
 ##############################################
-add_library(tridiag src/TridiagUtils.cpp)
-add_library(solver src/solver.cpp)
+add_library(tridiag src/tridiag_utils.cpp)
 
+add_library(solver src/solver.cpp)
 target_link_libraries(solver PRIVATE OpenMP::OpenMP_CXX)
 
 ##############################################

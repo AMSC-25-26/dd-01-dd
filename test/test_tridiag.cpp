@@ -1,4 +1,4 @@
-#include <TridiagUtils.hpp>
+#include <tridiag_utils.hpp>
 #include <iostream>
 #include <vector>
 #include <cmath>

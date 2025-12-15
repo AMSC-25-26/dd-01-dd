@@ -1,4 +1,4 @@
-#include <TridiagUtils.hpp>
+#include <tridiag_utils.hpp>
 #include <cmath>
 
 using Real = Types<Line>::Real;
@@ -73,7 +73,7 @@ Vector FactorizedTridiag::solve(const Vector& b) const {
     if (!_is_factorized) {
         throw std::logic_error("Matrix is not factorized. Call factorize() first.");
     }
-    if (b.size() != _n) {
+    if (b.size() != static_cast<size_t>(_n)) {
         throw std::invalid_argument("Vector b size must match matrix size");
     }
 
