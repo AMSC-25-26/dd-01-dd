@@ -4,6 +4,8 @@
 #include <fstream>
 #include <iomanip>
 #include <stdexcept>
+#include <cmath>
+#include <iostream>
 
 Types<Line>::Boundary PDESolver<Line>::get_subdomain_nonoverlapping_boundary(Index i) const {
     return {((subdomain_area * i) + omega.a),((subdomain_area * (i+1)) + omega.a)};
@@ -17,11 +19,11 @@ Types<Line>::Boundary PDESolver<Line>::get_subdomain_overlapping_boundary(Index 
 }
 
 Types<Line>::Index PDESolver<Line>::get_leftmost_node(Boundary boundary) const {
-    return static_cast<Index>((boundary.a-omega.a)/h);
+    return static_cast<Index>(std::round((boundary.a-omega.a)/h));
 }
 
 Types<Line>::Index PDESolver<Line>::get_rightmost_node(Boundary boundary) const {
-    return static_cast<Index>((boundary.b-omega.a)/h);
+    return static_cast<Index>(std::round((boundary.b-omega.a)/h));
 }
 
 Types<Line>::Index PDESolver<Line>::get_number_of_contained_nodes(Boundary boundary) const {
@@ -42,7 +44,7 @@ PDESolver<Line>::PDESolver(const PDEParams &pde_params, const SchwarzParams &sch
                                                                                                        Nsub(schwarz_params.N) {
     domain_area = omega.b - omega.a;
     subdomain_area = domain_area/Nsub;
-    Nnodes = static_cast<int>((omega.b - omega.a) / h) + 1;
+    Nnodes = static_cast<int>(std::round((omega.b - omega.a) / h)) + 1;
     /* TODO check conditions:
      * b-a is perfectly divisible by h
      * need b-a != 0

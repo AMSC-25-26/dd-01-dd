@@ -61,6 +61,9 @@ target_link_libraries(test_solver_shifted_domain solver tridiag OpenMP::OpenMP_C
 add_executable(test_solver_overlap_steep test/test_solver_overlap_steep.cpp)
 target_link_libraries(test_solver_overlap_steep solver tridiag OpenMP::OpenMP_CXX)
 
+add_executable(test_scaling_diagnostic test/test_scaling_diagnostic.cpp)
+target_link_libraries(test_scaling_diagnostic solver tridiag OpenMP::OpenMP_CXX)
+
 ##############################################
 #              Our Executables               #
 ##############################################
