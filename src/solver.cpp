@@ -141,9 +141,6 @@ Types<Line>::Vector DiscreteSolver<Line>::get_solution() const {
 }
 
 void DiscreteSolver<Line>::advance() {
-    if (u_next.size() != Nnodes) {
-        u_next.resize(Nnodes);
-    }
 
     #pragma omp parallel for
     for (int i = 0; i < Nsub; ++i) {
