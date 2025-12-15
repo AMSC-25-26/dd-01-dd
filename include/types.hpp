@@ -5,6 +5,8 @@
 #include <functional>
 #include <string>
 
+#define floating_point_error_tolerance 1e-15
+
 enum Dimension {
     Line = 1,
     Plane = 2
@@ -30,7 +32,6 @@ template<> class Types<Line> {
     public:
         std::string message;
         StatusCode code;
-        int iter;
 
         bool converged() const { return code == StatusCode::Ok; }
 

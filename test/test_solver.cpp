@@ -5,7 +5,9 @@
 #include <vector>
 #include <cmath>
 #include <cassert>
+#include <filesystem>
 #include <iomanip>
+#include <omp.h>
 
 using Real = Types<Line>::Real;
 using Index = Types<Line>::Index;
@@ -51,22 +53,21 @@ int main() {
     
     Real mu = 1.0;
     Real c = 0.0;
-    Real pi = 3.141592653589793;
     
-    // Domain [0, 1]
+    // Domain [0, 5]
     Domain omega = {0.0, 5.0}; 
     
     // Boundary Values u(0)=0, u(1)=0
     BoundaryVals dirichlet_bcs = {0.0, 0.0};
 
     // Forcing function f(x)
-    Function forcing_function = [pi](Real x) {
-        return pi * pi * std::sin(pi * x);
+    Function forcing_function = [](Real x) {
+        return M_PI * M_PI * std::sin(M_PI * x);
     };
 
     // Exact solution for validation
-    auto exact_solution = [pi](Real x) {
-        return std::sin(pi * x);
+    auto exact_solution = [](Real x) {
+        return std::sin(M_PI * x);
     };
 
     // -----------------------------------------------------
@@ -76,14 +77,9 @@ int main() {
     Real h = (omega.b - omega.a) / (N_nodes - 1);
     
     // Configure PDE Parameters
-    // Note: Assuming struct construction order based on typical usage. 
+    // Note: Assuming struct construction order based on typical usage.
     // You may need to adjust field names to match types.hpp definitions exactly.
-    PDEParams pde_params;
-    pde_params.mu = mu;
-    pde_params.c = c;
-    pde_params.omega = omega;
-    pde_params.dirichlet = dirichlet_bcs;
-    pde_params.f = forcing_function;
+    PDEParams pde_params{mu,c,forcing_function,omega,dirichlet_bcs};
 
     // Configure Schwarz Parameters
     SchwarzParams schwarz_params;
@@ -98,10 +94,15 @@ int main() {
     // -----------------------------------------------------
     // 3. Instantiate and Run Solver
     // -----------------------------------------------------
-    std::cout << "Initializing DiscreteSolver<Line>..." << std::endl;
-    std::cout << "  Grid size (h): " << h << std::endl;
-    std::cout << "  Subdomains:    " << schwarz_params.N << std::endl;
-    std::cout << "  Overlap:       " << schwarz_params.delta << std::endl;
+    std::cout << "Initializing DiscreteSolver..." << std::endl;
+    std::cout << "\tGrid size (h):   " << h << std::endl;
+    std::cout << "\tNodes:           " << N_nodes << std::endl;
+    std::cout << "\tSubdomains:      " << schwarz_params.N << std::endl;
+    std::cout << "\tOverlap:         " << schwarz_params.delta << std::endl;
+    std::cout << "\tMax Iterations:  " << solver_params.max_iter << std::endl;
+    std::cout << "\tTolerance:       " << solver_params.eps << std::endl;
+    std::cout << "\tThreads:         " << omp_get_max_threads() << std::endl;
+
 
     try {
         // Instantiate the solver specialized for Line (1D)
@@ -129,16 +130,18 @@ int main() {
 
         std::cout << "\n-------------------------------------------" << std::endl;
         std::cout << "Results:" << std::endl;
-        std::cout << "  Status: " << (solver.status.converged() ? "CONVERGED" : "NOT CONVERGED") << std::endl;
-        std::cout << "  Status message: " << solver.status.message << std::endl;
-        std::cout << "  Iterations:       " << solver.status.iter << std::endl;
-        std::cout << "  L2 Error Norm:    " << l2_error << std::endl;
+        std::cout << "\tStatus:           " << (solver.status.converged() ? "CONVERGED" : "NOT CONVERGED") << std::endl;
+        std::cout << "\tStatus message:   " << solver.status.message << std::endl;
+        std::cout << "\tIterations:       " << solver.iter << std::endl;
+        std::cout << "\tResidual:         " << solver.iter_diff << std::endl;
+        std::cout << "\tL2 Error Norm:    " << l2_error << std::endl;
         std::cout << "-------------------------------------------" << std::endl;
+
 
         // Assertion for automated testing
         if (l2_error < 1e-3) {
             std::cout << "[PASSED] Error is within acceptable bounds." << std::endl;
-            solver.print_to_file();
+            solver.print_to_file("./outputs/solution_test_solver.vtk");
             return 0;
         } else {
             std::cerr << "[FAILED] Error is too high." << std::endl;

@@ -13,6 +13,7 @@
 
 #include <types.hpp>
 #include <tridiag_utils.hpp>
+#include <filesystem>
 
 template<Dimension dim> class PDESolver : public Types<dim>{};
 
@@ -113,6 +114,8 @@ template<> class DiscreteSolver<Line> : public PDESolver<Line> {
 
     public:
         Status status;
+        Real iter_diff;
+        Index iter;
 
         DiscreteSolver(const PDEParams &pdep, const SchwarzParams &sp, const SolverParams &solver_params, const Real h);
         ~DiscreteSolver() = default;
@@ -129,14 +132,14 @@ template<> class DiscreteSolver<Line> : public PDESolver<Line> {
         /**
          * @brief TODO
          */
-        void print_to_file();
+        void print_to_file(std::filesystem::path output);
+        void print() const;
 
     protected:
         int max_iter;
         std::vector<SubdomainSolver<Line>> subdomain_solvers;
         Vector u_k, u_next;
-        Index iter;
-        Real iter_diff,eps;
+        Real eps;
 
 
     private:
