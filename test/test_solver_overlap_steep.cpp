@@ -28,7 +28,6 @@ int main() {
     std::cout << "  Schwarz Solver Test: steep overlap case\n";
     std::cout << "===========================================\n";
 
-    const Real pi = 3.141592653589793;
     const Domain omega = {0.0, 1.0};
     const BoundaryVals dirichlet_bcs = {0.0, 0.0};
 
@@ -40,8 +39,8 @@ int main() {
     pde_params.c = 5.0;    // stronger reaction
     pde_params.omega = omega;
     pde_params.dirichlet = dirichlet_bcs;
-    pde_params.f = [pi](Real x) {
-        return 0.5 * (4.0 * pi * pi) * std::sin(2.0 * pi * x) + 5.0 * std::sin(2.0 * pi * x);
+    pde_params.f = [](Real x) {
+        return 0.5 * (4.0 * M_PI * M_PI) * std::sin(2.0 * M_PI * x) + 5.0 * std::sin(2.0 * M_PI * x);
     }; // -0.5 u'' + 5 u with u = sin(2 pi x)
 
     SchwarzParams schwarz_params{};
@@ -52,8 +51,8 @@ int main() {
     solver_params.max_iter = 30000;
     solver_params.eps = 1e-8;
 
-    auto exact_solution = [pi](Real x) {
-        return std::sin(2.0 * pi * x);
+    auto exact_solution = [](Real x) {
+        return std::sin(2.0 * M_PI * x);
     };
 
     DiscreteSolver<Line> solver(pde_params, schwarz_params, solver_params, h);
@@ -69,11 +68,14 @@ int main() {
 
     Real l2_error = compute_L2_error(u_num, exact_solution, h);
 
-    std::cout << "\nResults:" << std::endl;
-    std::cout << "  Status: " << (solver.status.converged() ? "CONVERGED" : "NOT CONVERGED") << std::endl;
-    std::cout << "  Status message: " << solver.status.message << std::endl;
-    std::cout << "  Iterations:       " << solver.status.iter << std::endl;
-    std::cout << "  L2 Error Norm:    " << l2_error << std::endl;
+    std::cout << "\n-------------------------------------------" << std::endl;
+    std::cout << "Results:" << std::endl;
+    std::cout << "\tStatus:           " << (solver.status.converged() ? "CONVERGED" : "NOT CONVERGED") << std::endl;
+    std::cout << "\tStatus message:   " << solver.status.message << std::endl;
+    std::cout << "\tIterations:       " << solver.iter << std::endl;
+    std::cout << "\tResidual:         " << solver.iter_diff << std::endl;
+    std::cout << "\tL2 Error Norm:    " << l2_error << std::endl;
+    std::cout << "-------------------------------------------" << std::endl;
 
     if (l2_error < 3e-3) {
         std::cout << "[PASSED] Steep test within tolerance." << std::endl;

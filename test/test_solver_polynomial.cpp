@@ -69,11 +69,14 @@ int main() {
 
     Real l2_error = compute_L2_error(u_num, exact_solution, h);
 
-    std::cout << "\nResults:" << std::endl;
-    std::cout << "  Status: " << (solver.status.converged() ? "CONVERGED" : "NOT CONVERGED") << std::endl;
-    std::cout << "  Status message: " << solver.status.message << std::endl;
-    std::cout << "  Iterations:       " << solver.status.iter << std::endl;
-    std::cout << "  L2 Error Norm:    " << l2_error << std::endl;
+    std::cout << "\n-------------------------------------------" << std::endl;
+    std::cout << "Results:" << std::endl;
+    std::cout << "\tStatus:           " << (solver.status.converged() ? "CONVERGED" : "NOT CONVERGED") << std::endl;
+    std::cout << "\tStatus message:   " << solver.status.message << std::endl;
+    std::cout << "\tIterations:       " << solver.iter << std::endl;
+    std::cout << "\tResidual:         " << solver.iter_diff << std::endl;
+    std::cout << "\tL2 Error Norm:    " << l2_error << std::endl;
+    std::cout << "-------------------------------------------" << std::endl;
 
     if (l2_error < 1e-3) {
         std::cout << "[PASSED] Polynomial test within tolerance." << std::endl;
