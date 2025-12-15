@@ -1,4 +1,4 @@
-#include <TridiagUtils.hpp>
+#include <tridiag_utils.hpp>
 #include <cmath>
 
 using Real = Types<Line>::Real;
