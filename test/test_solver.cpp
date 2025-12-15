@@ -105,7 +105,7 @@ int main() {
 
     try {
         // Instantiate the solver specialized for Line (1D)
-        DiscreteSolver<Line> solver(pde_params, schwarz_params, &solver_params, h);
+        DiscreteSolver<Line> solver(pde_params, schwarz_params, solver_params, h);
 
         std::cout << "Solving system..." << std::endl;
         solver.solve();

@@ -1,3 +1,4 @@
+#include <cmath>
 #include <solver.hpp>
 #include <types.hpp>
 
@@ -17,10 +18,13 @@ Types<Line>::Boundary PDESolver<Line>::get_subdomain_overlapping_boundary(Index 
 }
 
 Types<Line>::Index PDESolver<Line>::get_leftmost_node(Boundary boundary) const {
-    return static_cast<Index>((boundary.a-omega.a)/h);
+    // check to not overshoot below 0
+    if (fabs(boundary.a-omega.a) < floating_point_error_tolerance) return 0;
+    return static_cast<Index>((boundary.a-omega.a)/h)+1;
 }
 
 Types<Line>::Index PDESolver<Line>::get_rightmost_node(Boundary boundary) const {
+    // no need to check for overshoot
     return static_cast<Index>((boundary.b-omega.a)/h);
 }
 
@@ -29,7 +33,7 @@ Types<Line>::Index PDESolver<Line>::get_number_of_contained_nodes(Boundary bound
     return get_rightmost_node(boundary) - get_leftmost_node(boundary) + 1;
 }
 
-// get global node index from (subdomain index, local node index)
+// get global node index from (subdomain index, local node index)rr
 // TODO: verify correctness
 Types<Line>::Index PDESolver<Line>::sub_to_local(SubIndexes sub) const noexcept {
     return get_leftmost_node(get_subdomain_overlapping_boundary(sub.i)) + sub.j;
@@ -68,8 +72,7 @@ const Index i) : PDESolver<Line>(pdep, sp, h), i(i), boundary_values(bv), ftd(ge
     b[0] = bv.u_a;
     b[N_overlap-1] = bv.u_b;
     for (auto j = 1; j < N_overlap-1; ++j) {
-        const Real xj = (static_cast<Real>(sub_to_local({i, j})) * h) + omega.a;
-        b[j] = f(xj);
+        b[j] = f((sub_to_local({i,j}) * h) + omega.a);
     }
 }
 
@@ -88,15 +91,15 @@ void SubdomainSolver<Line>::update_boundary(BoundaryVals bv) {
 }
 
 DiscreteSolver<Line>::DiscreteSolver(
-    const PDEParams &pdep, const SchwarzParams &sp, SolverParams *solver_params, const Real h
-) : PDESolver<Line>(pdep, sp, h), max_iter(solver_params->max_iter), iter(0), iter_diff(0), eps(solver_params->eps) {
+    const PDEParams &pdep, const SchwarzParams &sp, const SolverParams &solver_params, const Real h
+) : PDESolver<Line>(pdep, sp, h), max_iter(solver_params.max_iter), iter(0), iter_diff(0), eps(solver_params.eps) {
 
     status.code = SolveNotAttempted;
     status.message = "You have yet to call solve()";
 
     u_k.resize(Nnodes);
     u_next.resize(Nnodes);
-    subdomain_solvers.reserve(Nsub);  // reserve is OK here - we use emplace_back
+    subdomain_solvers.reserve(Nsub);
 
     // create a vector of SubdomainSolvers
     BoundaryVals bv = {0.0,0.0};
@@ -110,6 +113,11 @@ void DiscreteSolver<Line>::solve() {
     Real slope = (dirichlet.u_b-dirichlet.u_a)/(omega.b-omega.a);
     for (auto i = 0; i < Nnodes; ++i) {
         u_k[i] = (static_cast<Real>(i)*h - omega.a)*slope + dirichlet.u_a;
+    }
+
+    #pragma omp parallel for
+    for (auto i = 0; i < Nsub; ++i) {
+        subdomain_solvers[i].factorize();
     }
 
     iter_diff = eps + 1;
@@ -139,10 +147,6 @@ void DiscreteSolver<Line>::advance() {
 
     #pragma omp parallel for
     for (int i = 0; i < Nsub; ++i) {
-        if (iter == 0) {
-            subdomain_solvers[i].factorize(); 
-        }
-
         subdomain_solvers[i].update_boundary(current_boundary_cond(i));
 
         Vector u_i_k = subdomain_solvers[i].solve(); 

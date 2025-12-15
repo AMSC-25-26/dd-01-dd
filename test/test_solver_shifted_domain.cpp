@@ -57,7 +57,7 @@ int main() {
     solver_params.max_iter = 20000;
     solver_params.eps = 1e-8;
 
-    DiscreteSolver<Line> solver(pde_params, schwarz_params, &solver_params, h);
+    DiscreteSolver<Line> solver(pde_params, schwarz_params, solver_params, h);
 
     std::cout << "Solving system (shifted domain) ..." << std::endl;
     solver.solve();

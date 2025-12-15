@@ -12,7 +12,7 @@
 #define DD_01_DD_SOLVER_HPP
 
 #include <types.hpp>
-#include <TridiagUtils.hpp>
+#include <tridiag_utils.hpp>
 
 template<Dimension dim> class PDESolver : public Types<dim>{};
 
@@ -114,7 +114,7 @@ template<> class DiscreteSolver<Line> : public PDESolver<Line> {
     public:
         Status status;
 
-        DiscreteSolver(const PDEParams &pdep, const SchwarzParams &sp, SolverParams *solver_params, const Real h);
+        DiscreteSolver(const PDEParams &pdep, const SchwarzParams &sp, const SolverParams &solver_params, const Real h);
         ~DiscreteSolver() = default;
 
         /**

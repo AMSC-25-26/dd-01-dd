@@ -56,7 +56,7 @@ int main() {
         return std::sin(3.0 * pi * x);
     };
 
-    DiscreteSolver<Line> solver(pde_params, schwarz_params, &solver_params, h);
+    DiscreteSolver<Line> solver(pde_params, schwarz_params, solver_params, h);
 
     std::cout << "Solving system (high-frequency) ..." << std::endl;
     solver.solve();
