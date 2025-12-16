@@ -1,0 +1,58 @@
+DOXYFILE_ENCODING      = UTF-8
+PROJECT_NAME           = "DD"
+PROJECT_NUMBER         = 01
+PROJECT_BRIEF          = "Domain Decomposition using the Additive Schwarz Method"
+PROJECT_LOGO           = "./docs/Doxygen/DD_logo.png"
+OUTPUT_DIRECTORY       = "./docs/Doxygen/"
+CREATE_SUBDIRS         = NO
+OUTPUT_LANGUAGE        = English
+BRIEF_MEMBER_DESC      = YES
+REPEAT_BRIEF           = YES
+ABBREVIATE_BRIEF       = "The $name class" \
+                         "The $name widget" \
+                         "The $name file" \
+                         is \
+                         provides \
+                         specifies \
+                         contains \
+                         represents \
+                         a \
+                         an \
+                         the
+JAVADOC_BANNER         = YES
+PYTHON_DOCSTRING       = YES
+INHERIT_DOCS           = YES
+MARKDOWN_SUPPORT       = YES
+MARKDOWN_STRICT        = YES
+MARKDOWN_ID_STYLE      = DOXYGEN
+AUTOLINK_SUPPORT       = YES
+BUILTIN_STL_SUPPORT    = YES
+NUM_PROC_THREADS       = 4
+INPUT                  = README.md ./src ./include ./test ./docs/
+INPUT_ENCODING         = UTF-8
+FILE_PATTERNS          = *.c \
+                         *.cpp \
+                         *.c++ \
+                         *.h \
+                         *.hpp \
+                         *.md \
+                         *.markdown \
+                         *.py \
+USE_MDFILE_AS_MAINPAGE = README.md
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+HTML_FILE_EXTENSION    = .html
+HTML_HEADER            =
+HTML_FOOTER            =
+HTML_STYLESHEET        =
+HTML_COLORSTYLE        = AUTO_LIGHT
+HTML_COLORSTYLE_HUE    = 200
+HTML_COLORSTYLE_SAT    = 85
+HTML_COLORSTYLE_GAMMA  = 10
+GENERATE_LATEX         = YES
+LATEX_OUTPUT           = latex
+PAPER_TYPE             = a4
+HIDE_UNDOC_RELATIONS   = YES
+HAVE_DOT               = YES
+CLASS_GRAPH            = YES
+USE_MATHJAX            = YES

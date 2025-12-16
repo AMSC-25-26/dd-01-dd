@@ -29,12 +29,12 @@ Types<Line>::Index PDESolver<Line>::get_rightmost_node(Boundary boundary) const 
     return static_cast<Index>((boundary.b-omega.a)/h);
 }
 
-Types<Line>::Index PDESolver<Line>::get_number_of_contained_nodes(Boundary boundary) const {
+int PDESolver<Line>::get_number_of_contained_nodes(Boundary boundary) const {
     // +1 because both endpoints are included in the discrete grid
     return get_rightmost_node(boundary) - get_leftmost_node(boundary) + 1;
 }
 
-PDESolver<Line>::PDESolver(const PDEParams &pde_params, const SchwarzParams &schwarz_params, Real h) : mu(pde_params.mu),
+PDESolver<Line>::PDESolver(const PDEParams &pde_params, const SchwarzParams &schwarz_params, const Real h) : mu(pde_params.mu),
     c(pde_params.c), delta(schwarz_params.delta),
     h(h), omega(pde_params.omega), dirichlet(pde_params.dirichlet),
     f(pde_params.f),
@@ -42,11 +42,17 @@ PDESolver<Line>::PDESolver(const PDEParams &pde_params, const SchwarzParams &sch
     domain_area = omega.b - omega.a;
     subdomain_area = domain_area/Nsub;
     Nnodes = static_cast<int>((omega.b - omega.a) / h) + 1;
-    /* TODO check conditions:
-     * b-a is perfectly divisible by h
-     * need b-a != 0
-     * maybe more...
-     */
+
+    //checking conditions on parameters
+    if (mu <= 0) throw std::invalid_argument("The diffusion parameter mu must be s.t. mu > 0");
+    if (c < 0) throw std::invalid_argument("The reaction parameter c must be s.t. c >= 0 ");
+    if (delta <= 0) throw std::invalid_argument("The overlap must represent a real length > 0");
+    if (h <= 0) throw std::invalid_argument("The distance between nodes must be strictly positive");
+    if (fabs(static_cast<Size>(domain_area/h)*h - domain_area) > floating_point_error_tolerance)
+        throw std::invalid_argument("The distance between nodes must divide the domain evenly");
+    if (Nsub <= 0) throw std::invalid_argument("The Schwarz method require at least 1 subdomain");
+
+
 }
 
 // get global node index from (subdomain index, local node index)rr

@@ -3,3 +3,5 @@ build
 *.a
 *.vtk
 bin/*
+docs/Doxygen/html/*
+docs/Doxygen/latex/*
