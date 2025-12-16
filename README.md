@@ -8,11 +8,11 @@ The project is built with the vision of expansion in the future for the inclusio
 2D domains and cluster execution using MPI in conjunction with OpenMP.
 
 # Table of contents
-1. [Objective of the Projects](#Objective of the Projects)
-2. [How to read the docs](#How to read the docs)
-3. [Project structure](#Project structure)
-4. [Class Structure](#Class Structure)
-5. [Example of Usage](#Example of Usage)
+1. [Objective of the Projects](#Objective-of-the-Projects)
+2. [How to read the docs](#How-to-read-the-docs)
+3. [Project structure](#Project-structure)
+4. [Class Structure](#Class-Structure)
+5. [Example of Usage](#Example-of-Usage)
 6. [Authors](#Authors)
 
 
