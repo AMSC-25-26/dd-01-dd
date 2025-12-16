@@ -65,3 +65,13 @@ target_link_libraries(test_solver_overlap_steep solver tridiag OpenMP::OpenMP_CX
 #              Our Executables               #
 ##############################################
 #add_executable()
+
+
+##############################################
+#              Our Documentation             #
+##############################################
+find_package(Doxygen)
+if(Doxygen_FOUND)
+    message(STATUS "Doxygen found")
+    doxygen_add_docs(docs ${01_DD_DIR} WORKING_DIRECTORY ${01_DD_DIR} CONFIG_FILE "${01_DD_DIR}/docs/Doxygen/Doxyfile")
+endif()
