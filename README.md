@@ -1,4 +1,5 @@
-# Overview
+Project Overview {#mainpage}
+=========
 This project implements a 1D overlapping Schwarz solver library for linear diffusion–reaction problems
 using a tridiagonal (Thomas) factorization on each subdomain.
 Multiple test cases and utilities are provided to try out the solver and visualize results.
@@ -7,11 +8,11 @@ The project is built with the vision of expansion in the future for the inclusio
 2D domains and cluster execution using MPI in conjunction with OpenMP.
 
 # Table of contents
-1. [Objective of the Projects](#objective-of-the-project)
-2. [How to read the docs](#how-to-read-the-docs)
-3. [Project structure](#Project-structure)
-4. [Class Structure](#Class-Structure)
-5. [Example of Usage](#Example-of-Usage)
+1. [Objective of the Projects](#Objective of the Projects)
+2. [How to read the docs](#How to read the docs)
+3. [Project structure](#Project structure)
+4. [Class Structure](#Class Structure)
+5. [Example of Usage](#Example of Usage)
 6. [Authors](#Authors)
 
 
@@ -23,11 +24,11 @@ We expect to expand it in the future to non-constant coefficients.
 # How to read the docs
 This page only contains overall documentation for the project, for in depth documentation
 see the appropriate pages: 
-- [Compilation and execution](building.md)
-- [Doxygen documentation](documentation.md)
-- [Testing](tests.md)
-- [Thomas Factorization](thomas_algorithm.md)
-- [Visualization](paraview_visualization.md)
+- [Compilation and execution](docs/MarkDown/building.md)
+- [Doxygen documentation](docs/MarkDown/documentation.md)
+- [Testing](docs/MarkDown/tests.md)
+- [Thomas Factorization](docs/MarkDown/thomas_algorithm.md)
+- [Visualization](docs/MarkDown/paraview_visualization.md)
 
 # Project structure
 The project structure is as follows:
@@ -46,14 +47,14 @@ The project structure is as follows:
   └── test/
 ```
 * `bin` will contain the executables (for example tests) created by cmake.
-* `build` will be used by cmake, please see [Compilation and execution](building.md) for more information.
-* `docs/Doxygen` will contain the doxygen generated documentation, please see [Doxygen documentation](documentation.md) for more information.
+* `build` will be used by cmake, please see [Compilation and execution](docs/MarkDown/building.md) for more information.
+* `docs/Doxygen` will contain the doxygen generated documentation, please see [Doxygen documentation](docs/MarkDown/documentation.md) for more information.
 * `docs/Markdowns` contains all the markdowns files, including this one.
 * `docs/pdfs` contains useful pds references pertaining DD methods.
 * `include` contains all the`.hpp` files used by the library.
 * `libs` will contain the compiled `.a` library files.
 * `output` is a commodity directory used by test to save `.vtk` files.
-* `src` contains the actual body of the library and a useful python executable used for visualization, see [Visualization](paraview_visualization.md) for more information.
+* `src` contains the actual body of the library and a useful python executable used for visualization, see [Visualization](docs/MarkDown/paraview_visualization.md) for more information.
 * `test` contains premade test to stress the library and ensure the correct behaviours of all its components.
 
 # Class Structure
@@ -81,7 +82,7 @@ $$\begin{cases}
 Ly=b \\
 Ux = y
 \end{cases}$$
-We call `ftd.solve(b)` to solve the system on the r.h.s. `b`, please see [Thomas Algorithm](thomas_algorithm.md) for more general info on the algorith used to solve the system.
+We call `ftd.solve(b)` to solve the system on the r.h.s. `b`, please see [Thomas Algorithm](docs/MarkDown/thomas_algorithm.md) for more general info on the algorith used to solve the system.
 
 For more information please read the compiled documentation.
 

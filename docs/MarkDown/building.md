@@ -2,7 +2,7 @@
 
 ## Table of contents
 1. [Requirements](#Requirements)
-2. [How to compile](#How-to-compile)
+2. [How to compile](#How to compile)
 3. [Execution](#Execution)
 
 ## Requirements
