@@ -9,7 +9,7 @@ It also crates a $\LaTeX$ based pdf.
 * some kind of latex compiler is also necessary, usually provided with doxygen under linux.
 
 ## Configuration
-All doxygen configurations can be found at [Doxyfile](../Doxygen/Doxyfile).
+All doxygen configurations can be found at [Doxyfile](Doxygen/Doxyfile).
 
 ## Building the documentation
 Follow the instruction in [Compilation and execution](building.md) and then run: 

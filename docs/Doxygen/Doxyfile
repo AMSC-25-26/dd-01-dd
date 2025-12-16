@@ -28,7 +28,7 @@ MARKDOWN_ID_STYLE      = DOXYGEN
 AUTOLINK_SUPPORT       = YES
 BUILTIN_STL_SUPPORT    = YES
 NUM_PROC_THREADS       = 4
-INPUT                  = README.md ./src ./include ./test ./docs/MarkDown
+INPUT                  = README.md ./src ./include ./test ./docs/*.md
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
                          *.cpp \
