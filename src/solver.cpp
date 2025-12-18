@@ -224,9 +224,9 @@ void DiscreteSolver<Line>::print() const {
 
 void DiscreteSolver<Line>::advance() {
 
-    Real local_diff = 0.0;
-    iter_diff = 0;
-    #pragma omp parallel for firstprivate(local_diff)
+    iter_diff = 0.0;
+
+    #pragma omp parallel for reduction(max:iter_diff)
     for (int i = 0; i < Nsub; ++i) {
         subdomain_solvers[i].update_boundary(current_boundary_cond(i));
 
@@ -242,16 +242,15 @@ void DiscreteSolver<Line>::advance() {
 
         Index local_offset = first_node_nonoverlap - first_node_overlap;
 
+        Real local_diff = 0.0;
         for (Index k = first_node_nonoverlap; k <= last_node_nonoverlap; ++k) {
             Index local_node = local_offset + (k - first_node_nonoverlap);
             u_next[k] = u_i_k[local_node];
-            local_diff += (u_k[k] - u_next[k])*(u_k[k] - u_next[k]);
+            const Real diff = u_next[k] - u_k[k];
+            local_diff += diff * diff;
         }
 
-        local_diff = sqrt(local_diff);
-        #pragma omp critical
-        if (local_diff >= iter_diff) iter_diff = local_diff;
-
+        iter_diff = std::max(iter_diff, std::sqrt(local_diff));
     }
 
     std::swap(u_k, u_next);
