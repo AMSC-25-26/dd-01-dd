@@ -38,7 +38,6 @@ The project structure is as follows:
   ├── build/
   ├── docs/
   │   ├── Doxygen/
-  │   ├── MarkDown/
   │   └── pdfs/
   ├── include/
   ├── lib/
@@ -49,7 +48,6 @@ The project structure is as follows:
 * `bin` will contain the executables (for example tests) created by cmake.
 * `build` will be used by cmake, please see [Compilation and execution](docs/building.md) for more information.
 * `docs/Doxygen` will contain the doxygen generated documentation, please see [Doxygen documentation](docs/documentation.md) for more information.
-* `docs/Markdowns` contains all the markdowns files, including this one.
 * `docs/pdfs` contains useful pds references pertaining DD methods.
 * `include` contains all the`.hpp` files used by the library.
 * `libs` will contain the compiled `.a` library files.
